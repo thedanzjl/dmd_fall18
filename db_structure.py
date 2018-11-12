@@ -1,6 +1,7 @@
 
 from interface import Database
 db = Database('db.sqlite')
+db.clear_all()
 
 # ----CREATING TABLES----
 
@@ -16,10 +17,22 @@ db.exec('''
 ''')
 
 db.exec('''
+    CREATE TABLE IF NOT EXISTS payments (
+    payid INTEGER PRIMARY KEY,
+    cid INTEGER UNIQUE,
+    paytime DATETIME,
+    FOREIGN KEY (cid) REFERENCES customers(cid)
+    )
+''')
+
+db.exec('''
     CREATE TABLE IF NOT EXISTS rides (
         rid INTEGER PRIMARY KEY,
-        initial_location VARCHAR(40),
+        initial_car_location VARCHAR(40),
+        source_location VARCHAR(40),
         destination VARCHAR(40),
+        start_ride_time DATETIME,
+        end_ride_time DATETIME,
         carid INTEGER UNIQUE, 
         cid INTEGER UNIQUE,
         FOREIGN KEY (carid) REFERENCES cars(carid),
@@ -30,6 +43,8 @@ db.exec('''
 db.exec('''
     CREATE TABLE IF NOT EXISTS cars (
         carid INTEGER PRIMARY KEY,
+        plate VARCHAR(20),
+        color VARCHAR(20),
         current_state VARCHAR(20),
         battery_level INTEGER,
         location VARCHAR(40), 
@@ -55,9 +70,9 @@ db.exec('''
 ''')
 
 db.exec('''
-    CREATE TABLE IF NOT EXISTS car_part_types (
-        cpid INTEGER PRIMARY KEY,
-        price INTEGER)                   
+    CREATE TABLE IF NOT EXISTS car_parts (
+        cpid INTEGER PRIMARY KEY, 
+        title VARCHAR(40))                   
 ''')
 
 db.exec('''
@@ -77,11 +92,16 @@ db.exec('''
         availability VARCHAR(20),
         price_in_hours INTEGER)             
 ''')
+
+
 # ----MAKING MANY-TO-MANY RELATIONSHIPS----
 db.exec('''
-    CREATE TABLE IF NOT EXISTS workshops_have_car_parts (
+    CREATE TABLE IF NOT EXISTS workshops_sell_car_parts (
     wid INTEGER, 
-    cpid INTEGER
+    cpid INTEGER, 
+    selltime DATETIME NULL, 
+    amount INTEGER,
+    price INTEGER
     )
 ''')
 
@@ -89,6 +109,14 @@ db.exec('''
     CREATE TABLE IF NOT EXISTS providers_provide_car_parts (
     pid INTEGER, 
     cpid INTEGER
+    )
+''')
+
+db.exec('''
+    CREATE TABLE IF NOT EXISTS cars_repaired (
+    carid INTEGER, 
+    wid INTEGER,
+    price INTEGER
     )
 ''')
 
@@ -103,6 +131,16 @@ db.exec('''
     CREATE TABLE IF NOT EXISTS charging_stations_suits_plug_types (
     ptid INTEGER, 
     csid INTEGER
+    )
+''')
+
+db.exec('''
+    CREATE TABLE IF NOT EXISTS cars_charged (
+    carid INTEGER, 
+    csid INTEGER,
+    usage_time DATETIME,
+    charging_time_amount INTEGER, 
+    price INTEGER
     )
 ''')
 

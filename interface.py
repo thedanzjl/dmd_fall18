@@ -24,21 +24,17 @@ class Database:
         """
         :param kwargs: listed attributes to be inserted into table.
         :param table_name: name of table in string format
-        EXAMPLE OF USE: insert_into('customers', username='hello132', name='Vacya', id=0)
+        EXAMPLE OF USE: insert_into('customers', username='hello132', name='Vasya', id=0)
         """
         insert_statement = """INSERT INTO {}{} VALUES {}""".format(
             table_name, str(tuple(kwargs.keys())).replace("'", ""), tuple(kwargs.values()))
         self.exec(insert_statement)
 
     def clear_all(self):
-        self.exec("DELETE FROM customers")
-        self.exec("DELETE FROM rides")
-        self.exec("DELETE FROM cars")
-        self.exec("DELETE FROM plug_types")
-        self.exec("DELETE FROM charging_stations")
-        self.exec("DELETE FROM car_part_types")
-        self.exec("DELETE FROM providers")
-        self.exec("DELETE FROM workshops")
+        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        names = self.cursor.fetchall()
+        for name in names:
+            self.exec("DELETE FROM {}".format(name[0]))
 
     def clear(self, table_name):
         self.exec("DELETE FROM {}".format(table_name))

@@ -1,9 +1,19 @@
 
-import sqlite3
+from interface import Database
 
-db = sqlite3.connect("db.sqlite")
-
-cursor = db.cursor()
+db = Database("db.sqlite")
 
 
-db.close()
+db.exec("""
+INSERT INTO customers(cid, username, full_name, location, phone_number, email)
+VALUES (0, 'a', 'a', 'a', 'a', 'a')
+""")
+db.exec("""
+INSERT INTO customers(cid, username, full_name, location, phone_number, email)
+VALUES (1, 'a', 'b', 'a', 'a', 'a')
+""")
+
+print(db.query("""
+SELECT * FROM customers
+"""))
+

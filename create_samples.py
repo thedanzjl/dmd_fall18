@@ -20,7 +20,6 @@ for _ in range(N):  # generate random usernames
         username += random.choice(chars)
     usernames.append(username)
 
-
 for id in range(N):
     username = usernames[id]
     full_name = random.choice(names)
@@ -39,19 +38,14 @@ for id in range(N):
 
 # INSERTING CHARGING_STATIONS SAMPLES
 
-# INSERTING CAR_PART_TYPES SAMPLES
+# INSERTING CAR_PARTS SAMPLES
 
 # INSERTING PROVIDERS SAMPLES
 
 # INSERTING WORKSHOPS SAMPLES
 
-# INSERTING RELATIONSHIPS WORKSHOPS-HAVE-CAR_PARTS
 
-# INSERTING RELATIONSHIPS PROVIDERS-PROVIDE-CAR_PARTS
-
-# INSERTING RELATIONSHIPS CARS-HAVE-CAR_PART
-
-# INSERTING RELATIONSHIPS CHARGING_STATIONS-SUITS-PLUG_TYPES
+del db
 
 
 if __name__ == '__main__':

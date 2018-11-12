@@ -1,6 +1,8 @@
 """
 This file releases 2.3 goal in the assignment: Implement select queries
 """
+from interface import Database
+db = Database('db.sqlite')
 
 
 def select_3_1():
@@ -98,3 +100,14 @@ def select_3_10():
     pass
 
 
+if __name__ == '__main__':
+    select_3_1()
+    select_3_2()
+    select_3_3()
+    select_3_4()
+    select_3_5()
+    select_3_6()
+    select_3_7()
+    select_3_8()
+    select_3_9()
+    select_3_10()

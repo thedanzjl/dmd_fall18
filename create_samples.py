@@ -32,6 +32,23 @@ for id in range(N):
 
 # INSERTING CARS SAMPLES
 
+
+colors = ['Red', 'Green', 'Blue', 'Black', 'White']
+locations2 = ['Barbara street', 'Universitetskaya', 'Sportivnaya']
+states = ['broken','awaiting','busy','charging']
+
+for id in range(N):
+    plate = ''.join([random.choice('0123456789') for i in range(5)])
+    color = random.choice(colors)
+    current_state = random.choice(states)
+    battery_level = ''.join([random.choice('0123456789') for i in range(2)])
+    location = str(random.choice(locations2)) + ''.join([random.choice('0123456789') for i in range(3)])
+    ptid = ''.join([random.choice('0123456789') for i in range(2)])
+
+    db.insert_into('cars', carid=id, plate=plate, color=color, current_state=current_state,
+                   battery_level = battery_level, location = location, ptid = ptid)
+
+
 # INSERTING RIDES SAMPLES
 
 # INSERTING PLUG_TYPES SAMPLES
@@ -47,9 +64,9 @@ for id in range(N):
 
 del db
 
-
-if __name__ == '__main__':
-    print(db.query("""
-    SELECT * FROM customers
-    """))
+#
+# if __name__ == '__main__':
+#     print(db.query("""
+#     SELECT * FROM customers
+#     """))
 

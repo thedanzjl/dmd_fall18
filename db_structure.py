@@ -31,10 +31,10 @@ db.exec('''
         initial_car_location VARCHAR(40),
         source_location VARCHAR(40),
         destination VARCHAR(40),
-        start_ride_time DATETIME,
-        end_ride_time DATETIME,
-        carid INTEGER UNIQUE, 
-        cid INTEGER UNIQUE,
+        start_ride_time TIMESTAMP,
+        end_ride_time TIMESTAMP,
+        carid INTEGER, 
+        cid INTEGER,
         FOREIGN KEY (carid) REFERENCES cars(carid),
         FOREIGN KEY (cid) REFERENCES customers(cid)
         )

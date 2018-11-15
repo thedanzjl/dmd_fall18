@@ -4,12 +4,12 @@ import sqlite3
 class Database:
 
     def __init__(self, name):
-        self.connection = sqlite3.connect(name)
+        self.connection = sqlite3.connect(name, detect_types=sqlite3.PARSE_DECLTYPES)
         self.cursor = self.connection.cursor()
 
-    def exec(self, query):
+    def exec(self, query, *args):
         # try:
-        self.cursor.execute(query)
+        self.cursor.execute(query, *args)
         self.connection.commit()
         # except:
         #     self.connection.rollback()
@@ -26,9 +26,9 @@ class Database:
         :param table_name: name of table in string format
         EXAMPLE OF USE: insert_into('customers', username='hello132', name='Vasya', id=0)
         """
-        insert_statement = """INSERT INTO {}{} VALUES {}""".format(
-            table_name, str(tuple(kwargs.keys())).replace("'", ""), tuple(kwargs.values()))
-        self.exec(insert_statement)
+        values_names = str(tuple(kwargs.keys())).replace("'", "")
+        q_signs = (',?' * len(kwargs))[1:]
+        self.exec('''insert into {}{} values ({})'''.format(table_name, values_names, q_signs), tuple(kwargs.values()))
 
     def clear_all(self):
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")

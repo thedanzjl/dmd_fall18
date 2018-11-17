@@ -19,15 +19,15 @@ db.exec('''
 db.exec('''
     CREATE TABLE IF NOT EXISTS payments (
     payid INTEGER PRIMARY KEY,
-    cid INTEGER UNIQUE,
+    cid INTEGER,
     paytime DATETIME,
+    amount INTEGER, 
     FOREIGN KEY (cid) REFERENCES customers(cid)
     )
 ''')
 
 db.exec('''
     CREATE TABLE IF NOT EXISTS rides (
-        rid INTEGER PRIMARY KEY,
         initial_car_location VARCHAR(40),
         source_location VARCHAR(40),
         destination VARCHAR(40),
@@ -36,14 +36,15 @@ db.exec('''
         carid INTEGER, 
         cid INTEGER,
         FOREIGN KEY (carid) REFERENCES cars(carid),
-        FOREIGN KEY (cid) REFERENCES customers(cid)
+        FOREIGN KEY (cid) REFERENCES customers(cid),
+        PRIMARY KEY (carid, cid, start_ride_time)
         )
 ''')
 
 db.exec('''
     CREATE TABLE IF NOT EXISTS cars (
         carid INTEGER PRIMARY KEY,
-        plate VARCHAR(20),
+        plate VARCHAR(20) UNIQUE,
         color VARCHAR(20),
         current_state VARCHAR(20),
         battery_level INTEGER,
@@ -64,7 +65,6 @@ db.exec('''
         csid INTEGER PRIMARY KEY,
         location VARCHAR(40),
         price INTEGER,
-        plug_types VARCHAR(40),
         time_of_charging_min INTEGER,
         amount_of_sockets INTEGER)                     
 ''')
@@ -88,9 +88,8 @@ db.exec('''
     CREATE TABLE IF NOT EXISTS workshops (
         wid INTEGER PRIMARY KEY,
         name VARCHAR(20),
-        location VARCHAR(40),
-        availability VARCHAR(20),
-        price_in_hours INTEGER)             
+        location VARCHAR(40)
+        )             
 ''')
 
 
@@ -101,14 +100,16 @@ db.exec('''
     cpid INTEGER, 
     selltime DATETIME NULL, 
     amount INTEGER,
-    price INTEGER
+    price INTEGER,
+    PRIMARY KEY (wid, cpid)
     )
 ''')
 
 db.exec('''
     CREATE TABLE IF NOT EXISTS providers_provide_car_parts (
     pid INTEGER, 
-    cpid INTEGER
+    cpid INTEGER, 
+    PRIMARY KEY (pid, cpid)
     )
 ''')
 
@@ -116,21 +117,24 @@ db.exec('''
     CREATE TABLE IF NOT EXISTS cars_repaired (
     carid INTEGER, 
     wid INTEGER,
-    price INTEGER
+    price INTEGER, 
+    PRIMARY KEY (carid, wid)
     )
 ''')
 
 db.exec('''
     CREATE TABLE IF NOT EXISTS cars_have_car_parts (
     carid INTEGER,
-    cpid INTEGER
+    cpid INTEGER, 
+    PRIMARY KEY (carid, cpid)
     )
 ''')
 
 db.exec('''
     CREATE TABLE IF NOT EXISTS charging_stations_suits_plug_types (
     ptid INTEGER, 
-    csid INTEGER
+    csid INTEGER, 
+    PRIMARY KEY (ptid, csid)
     )
 ''')
 
@@ -140,7 +144,8 @@ db.exec('''
     csid INTEGER,
     usage_time DATETIME,
     charging_time_amount INTEGER, 
-    price INTEGER
+    price INTEGER, 
+    PRIMARY KEY (carid, csid)
     )
 ''')
 

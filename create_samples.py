@@ -36,23 +36,33 @@ for id in range(N):
 # INSERTING cars SAMPLES
 
 colors = ['Red', 'Green', 'Blue', 'Black', 'White']
-states = ['broken','awaiting','busy','charging']
+states = ['broken', 'awaiting', 'busy', 'charging']
+plates = []
+for i in range(N):
+    plate = ''
+    plate += random.choice('ABCDEFGHIJKLMN')
+    plate += random.choice('ABCDEFGHIJKLMN')
+    for _ in range(3):
+        plate += random.choice('1234567890')
+    plates.append(plate)
 
-for id in range(N):
-    plate = ''.join([random.choice('0123456789') for _ in range(5)])
+for id, plate in enumerate(plates):
     color = random.choice(colors)
     current_state = random.choice(states)
     battery_level = ''.join([random.choice('0123456789') for _ in range(2)])
     location = str(random.choice(locations2)) + ''.join([random.choice('0123456789') for _ in range(3)])
-    ptid = ''.join([random.choice('0123456789') for i in range(2)])
+    ptid = random.randint(0, N-1)
 
     db.insert_into('cars', carid=id, plate=plate, color=color, current_state=current_state,
                    battery_level=battery_level, location=location, ptid=ptid)
 
+db.insert_into('cars', carid=len(plates), plate='AN123', color='Red', current_state='busy',
+               battery_level=71, location=locations[0], ptid=1)
+
 
 # INSERTING rides SAMPLES
 
-for id in range(N):
+for _ in range(N):
     initial_location = random.choice(locations)
     source_location = random.choice(locations)
     destination = random.choice(locations)
@@ -61,7 +71,7 @@ for id in range(N):
     carid = random.randint(0, N - 1)
     cid = random.randint(0, N - 1)
 
-    db.insert_into('rides', rid=id, initial_car_location=initial_location, source_location=source_location,
+    db.insert_into('rides', initial_car_location=initial_location, source_location=source_location,
                    destination=destination, cid=cid, start_ride_time=start_ride_time, end_ride_time=end_ride_time,
                    carid=carid)
 
@@ -70,7 +80,7 @@ for id in range(N):
 
 for id in range(N):
     size = random.randint(0, 5)
-    shape = random.choice('square', 'circle', 'rectangle')
+    shape = random.choice(('square', 'circle', 'rectangle'))
 
     db.insert_into('plug_types', ptid=id, size=size, shape=shape)
 
@@ -80,92 +90,102 @@ for id in range(N):
 for id in range(N):
     location = random.choice(locations)
     price = random.randint(100, 500)
-    plug_types = random.choice('square', 'circle', 'rectangle')
     time_of_charging_min = random.randint(10, 60)
     amount_of_sockets = random.randint(0, 10)
 
-    db.insert_into('charging_stations', csid=id, location=location, price=price, plug_types=plug_types,
+    db.insert_into('charging_stations', csid=id, location=location, price=price,
                    time_of_charging_min=time_of_charging_min, amount_of_sockets=amount_of_sockets)
 
 
 # INSERTING car_parts SAMPLES
 
-for id in range(N):
-    title = random.choice('steering wheel', 'wheel', 'motor', 'wipers', 'seat', 'door', 'carburetor', 'radio')
+car_parts = ('steering wheel', 'wheel', 'motor', 'wipers', 'seat', 'door', 'carburetor', 'radio')
 
+for id, title in enumerate(car_parts):
     db.insert_into('car_parts', cpid=id, title=title)
+
 
 # INSERTING providers SAMPLES
 
-for id in range(N):
-    name = random.choice('SuperCar', 'BestProvider', 'CatAndCar')
-    phone_number = ('2550550', '4368993', '4324600')
+providers = ('SuperCar', 'BestProvider', 'CatAndCar')
+for id, name in enumerate(providers):
+    phone_number = random.choice(('2550550', '4368993', '4324600'))
     location = random.choice(locations)
-
     db.insert_into('providers', pid=id, name=name, phone_number=phone_number, location=location)
+
+
+# INSERTING workshops SAMPLES
+
+workshops = ('BestWorkshop', 'MadeInChina', 'CrazyKuzya')
+for id, name in enumerate(workshops):
+    location = random.choice(locations)
+    db.insert_into('workshops', wid=id, name=name, location=location)
 
 
 # INSERTING workshops_sell_car_parts SAMPLES
 
-for id in range(N):
-    wid = random.randint(0, N - 1)
-    cpid = random.randint(0, N - 1)
-    selltime = datetime(2018, 11, 16, random.randint(0, 1), random.randint(0, 59), 0)
-    amount = random.randint(0, 100)
-    price = random.randint(500, 10000)
+for cpid in range(len(car_parts)):
+    for wid in range(len(workshops)):
+        if random.randint(0, 1):
+            selltime = datetime(2018, 11, 16, random.randint(0, 1), random.randint(0, 59), 0)
+        else:
+            selltime = None
+        amount = random.randint(0, 30)
+        price = random.randint(500, 10000)
 
-    db.insert_into('workshops_sell_car_parts', wid=wid, cpid=cpid, selltime=selltime, amount=amount, price=price)
+        db.insert_into('workshops_sell_car_parts', wid=wid, cpid=cpid, selltime=selltime, amount=amount, price=price)
 
 
 # INSERTING providers_provide_car_parts SAMPLES
 
-for id in range(N):
-    pid = random.randint(0, N - 1)
-    cpid = random.randint(0, N - 1)
-
-    db.insert_into('providers_provide_car_parts', pid=pid, cpid=cpid)
+for pid in range(N):
+    for cpid in range(N):
+        if random.randint(0, 3):
+            db.insert_into('providers_provide_car_parts', pid=pid, cpid=cpid)
 
 
 # INSERTING cars_repaired SAMPLES
 
-for id in range(N):
-    carid = random.randint(0, N - 1)
-    wid = random.randint(0, N - 1)
-    price = random.randint(0, N - 1)
-
-    db.insert_into('cars_rapaired', carid=carid, wid=wid, price=price)
+for carid in range(N):
+    for wid in range(len(workshops)):
+        price = random.randint(1000, 50000)
+        if random.randint(0, 1):
+            db.insert_into('cars_repaired', carid=carid, wid=wid, price=price)
 
 
 # INSERTING cars_have_car_parts SAMPLES
 
-for i in range(N):
-    carid = random.randint(0, N - 1)
-    cpid = random.randint(0, N - 1)
-
-    db.insert_into('cars_have_car_parts', carid=carid, cpid=cpid)
+for carid in range(N):
+    for cpid in range(N):
+        db.insert_into('cars_have_car_parts', carid=carid, cpid=cpid)
 
 
 # INSERTING charging_stations_suits_plug_types SAMPLES
 
-for i in range(N):
-    ptid = random.randint(0, N - 1)
-    csid = random.randint(0, N - 1)
-
+for csid in range(N):
+    ptid = random.randint(0, N-1)
     db.insert_into('charging_stations_suits_plug_types', ptid=ptid, csid=csid)
 
 
 # INSERTING cars_charged SAMPLES
 
-for i in range(N):
-    carid = random.randint(0, N - 1)
-    csid = random.randint(0, N - 1)
-    usage_time = datetime(2018, 11, 16, random.randint(0, 1), random.randint(0, 59), 0)
-    charging_time_amount = random.randint(10, 60)
-    price = random.randint(100, 500)
+for carid in range(N):
+    for csid in range(N):
+        usage_time = datetime(2018, 11, random.randint(1, 10), random.randint(0, 12), random.randint(0, 59), 0)
+        charging_time_amount = random.randint(10, 60)
+        price = random.randint(100, 500)
+        db.insert_into('cars_charged', carid=carid, csid=csid, usage_time=usage_time,
+                       charging_time_amount=charging_time_amount, price=price)
 
-    db.insert_into('cars_charged', carid=carid, csid=csid, usage_time=usage_time,
-                   charging_time_amount=charging_time_amount, price=price)
+# INSERTING payments SAMPLES
 
+for payid in range(N):
+    cid = random.randint(0, N-1)
+    paytime = datetime(2018, random.randint(1, 11), random.randint(1, 10), random.randint(0, 12), random.randint(0, 59), 0)
+    amount = random.randint(100, 700)
+    db.insert_into('payments', payid=payid, cid=cid, paytime=paytime, amount=amount)
+
+# close database
 del db
 
 

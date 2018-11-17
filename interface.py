@@ -14,9 +14,9 @@ class Database:
         # except:
         #     self.connection.rollback()
 
-    def query(self, query):
+    def query(self, query, *args):
         cursor = self.connection.cursor()
-        cursor.execute(query)
+        cursor.execute(query, *args)
 
         return cursor.fetchall()
 
@@ -43,33 +43,28 @@ class Database:
         self.connection.close()
 
 
-if __name__ == "__main__":
-    db = Database('test.sqlite')
+def intro(func):
+    """
+    Wrapper function that introduces function name and prints its result
+    """
 
-    # CleanUp Operation
-    del_query = "DELETE FROM basic_python_database"
-    db.exec(del_query)
+    def inner(*args, **kwargs):
+        result = func(*args, **kwargs)
+        if result is not None:
+            print(func.__name__, ': ')
+            print(result)
+        return result
 
-    # Data Insert into the table
-    query = """
-            INSERT INTO basic_python_database
-            (`name`, `age`)
-            VALUES
-            ('Mike', 21),
-            ('Michael', 21),
-            ('Imran', 21)
-            """
+    return inner
 
-    # db.query(query)
-    db.insert(query)
 
-    # Data retrieved from the table
-    select_query = """
-            SELECT * FROM basic_python_database
-            WHERE age = 21
-            """
+class MyDate:
 
-    people = db.query(select_query)
+    def __init__(self, y, m, d):
+        self.y = y
+        self.m = m
+        self.d = d
 
-    for person in people:
-        print("Found ? " % person['name'])
+    def __str__(self):
+        return '{:4}-{:02}-{:02}'.format(self.y, self.m, self.d)
+

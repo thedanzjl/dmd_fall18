@@ -30,11 +30,19 @@ class Database:
         q_signs = (',?' * len(kwargs))[1:]
         self.exec('''insert into {}{} values ({})'''.format(table_name, values_names, q_signs), tuple(kwargs.values()))
 
-    def clear_all(self):
+    def get_tables_names(self):
         self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
         names = self.cursor.fetchall()
+        return list(map(lambda x: x[0], names))
+
+    def get_table_info(self, table_name):
+        columns = self.query('''PRAGMA table_info({});'''.format(table_name))
+        return columns
+
+    def clear_all(self):
+        names = self.get_tables_names()
         for name in names:
-            self.exec("DELETE FROM {}".format(name[0]))
+            self.exec("DELETE FROM {}".format(name))
 
     def clear(self, table_name):
         self.exec("DELETE FROM {}".format(table_name))

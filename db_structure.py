@@ -65,8 +65,7 @@ db.exec('''
         csid INTEGER PRIMARY KEY,
         location VARCHAR(40),
         price INTEGER,
-        time_of_charging_min INTEGER,
-        amount_of_sockets INTEGER)                     
+        amount_of_sockets INTEGER)                  
 ''')
 
 db.exec('''

@@ -90,11 +90,10 @@ for id in range(N):
 for id in range(N):
     location = random.choice(locations)
     price = random.randint(100, 500)
-    time_of_charging_min = random.randint(10, 60)
     amount_of_sockets = random.randint(0, 10)
 
     db.insert_into('charging_stations', csid=id, location=location, price=price,
-                   time_of_charging_min=time_of_charging_min, amount_of_sockets=amount_of_sockets)
+                   amount_of_sockets=amount_of_sockets)
 
 
 # INSERTING car_parts SAMPLES

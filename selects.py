@@ -65,6 +65,7 @@ def select_3_4():
     #     #         if i != j and pay1[0] == pay1[0] and pay2[0] == pay2[0]:
     #     #             return 'User paid twice at ' + pay1[0]
     #     # return 'User paid only once'
+    pass
 
 
 @intro
@@ -107,8 +108,20 @@ def select_3_8():
     location of residence depend on how many charging station the self-driving cars
     was using the same day”. Now you as DB developer need to provide this data.
     You’ve decided to collect the data for each day within one month and then sum them up.
+    Example INPUT:
+    starting date (e.g 1.10.2017)
     """
-    pass
+
+    date = MyDate(2018, 10, 1)
+    datemax = MyDate(date.y, date.m+1, date.d)
+
+    within_month = db.query('''select cid, count(cid) from (select carid, cid from (select * from (((select usage_time, carid from cars_charged) natural join (select start_ride_time, carid, cid from rides where date(start_ride_time)>"{}" and date(start_ride_time)<"{}")))) where date(usage_time) = date(start_ride_time)) group by cid
+'''.format(str(date),str(datemax)))
+
+    return(within_month)
+
+
+
 
 
 @intro

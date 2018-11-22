@@ -31,7 +31,7 @@ db.exec('''
         initial_car_location VARCHAR(40),
         source_location VARCHAR(40),
         destination VARCHAR(40),
-        start_ride_time TIMESTAMP,
+        start_ride_time DATETIME,
         end_ride_time TIMESTAMP,
         carid INTEGER, 
         cid INTEGER,
@@ -144,7 +144,7 @@ db.exec('''
     usage_time DATETIME,
     charging_time_amount INTEGER, 
     price INTEGER, 
-    PRIMARY KEY (carid, csid)
+    PRIMARY KEY (carid, csid, usage_time)
     )
 ''')
 

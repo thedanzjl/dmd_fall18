@@ -62,18 +62,54 @@ db.insert_into('cars', carid=len(plates), plate='AN123', color='Red', current_st
 
 # INSERTING rides SAMPLES
 
-for _ in range(N):
-    initial_location = random.choice(locations)
-    source_location = random.choice(locations)
-    destination = random.choice(locations)
-    start_ride_time = datetime(2018, 11, 16, random.randint(0, 1), random.randint(0, 59), 0)
-    end_ride_time = datetime(2018, 11, 16, random.randint(2, 3), random.randint(0, 59), 0)
-    carid = random.randint(0, N - 1)
-    cid = random.randint(0, N - 1)
+# for _ in range(N):
+#     initial_location = random.choice(locations)
+#     source_location = random.choice(locations)
+#     destination = random.choice(locations)
+#     start_ride_time = datetime(2018, random.randint(1, 12), random.randint(1, 30), random.randint(0, 1), random.randint(0, 59), 0)
+#     end_ride_time = datetime(2018, int(start_ride_time.month), int(start_ride_time.day), random.randint(2, 3), random.randint(0, 59), 0)
+#     carid = random.randint(0, N - 1)
+#     cid = random.randint(0, N - 1)
+#
+#     db.insert_into('rides', initial_car_location=initial_location, source_location=source_location,
+#                    destination=destination, cid=cid, start_ride_time=start_ride_time, end_ride_time=end_ride_time,
+#                    carid=carid)
+db.insert_into('rides', initial_car_location='1', source_location='2',
+                     destination='3', cid=1, start_ride_time=datetime(2018, 10, 5, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 5, 3, random.randint(0, 59), 0),
+                     carid=7)
+db.insert_into('rides', initial_car_location='1', source_location='2',
+                     destination='3', cid=1, start_ride_time=datetime(2018, 10, 6, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 6, 3, random.randint(0, 59), 0),
+                     carid=9)
+db.insert_into('rides', initial_car_location='1', source_location='2',
+                     destination='3', cid=1, start_ride_time=datetime(2018, 10, 7, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 7, 3, random.randint(0, 59), 0),
+                     carid=10)
+db.insert_into('rides', initial_car_location='1', source_location='2',
+                     destination='3', cid=2, start_ride_time=datetime(2018, 10, 6, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 6, 3, random.randint(0, 59), 0),
+                     carid=10)
 
-    db.insert_into('rides', initial_car_location=initial_location, source_location=source_location,
-                   destination=destination, cid=cid, start_ride_time=start_ride_time, end_ride_time=end_ride_time,
-                   carid=carid)
+
+db.insert_into('cars_charged', carid=7, csid=2, usage_time=datetime(2018, 10, 5, 5, random.randint(0, 59), 0),
+                      charging_time_amount=20, price=100)
+
+db.insert_into('cars_charged', carid=9, csid=2, usage_time=datetime(2018, 10, 6, 5, random.randint(0, 59), 0),
+                      charging_time_amount=20, price=100)
+
+db.insert_into('cars_charged', carid=9, csid=2, usage_time=datetime(2018, 10, 10, 5, random.randint(0, 59), 0),
+                      charging_time_amount=20, price=100)
+
+db.insert_into('cars_charged', carid=10, csid=2, usage_time=datetime(2018, 10, 6, 5, random.randint(0, 59), 0),
+                      charging_time_amount=20, price=100)
+
+
+# INSERTING cars_charged SAMPLES
+
+# for carid in range(N):
+#     for csid in range(N):
+#         usage_time = datetime(2018, random.randint(1, 12), random.randint(1, 30), random.randint(0, 12), random.randint(0, 59), 0)
+#         charging_time_amount = random.randint(10, 60)
+#         price = random.randint(100, 500)
+#         db.insert_into('cars_charged', carid=carid, csid=csid, usage_time=usage_time,
+#                        charging_time_amount=charging_time_amount, price=price)
 
 
 # INSERTING plug_types SAMPLES
@@ -166,15 +202,6 @@ for csid in range(N):
     db.insert_into('charging_stations_suits_plug_types', ptid=ptid, csid=csid)
 
 
-# INSERTING cars_charged SAMPLES
-
-for carid in range(N):
-    for csid in range(N):
-        usage_time = datetime(2018, 11, random.randint(1, 10), random.randint(0, 12), random.randint(0, 59), 0)
-        charging_time_amount = random.randint(10, 60)
-        price = random.randint(100, 500)
-        db.insert_into('cars_charged', carid=carid, csid=csid, usage_time=usage_time,
-                       charging_time_amount=charging_time_amount, price=price)
 
 # INSERTING payments SAMPLES
 

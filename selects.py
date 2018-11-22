@@ -3,6 +3,7 @@ This file releases 2.3 goal in the assignment: Implement select queries
 """
 from datetime import datetime
 from interface import *
+
 db = Database('db.sqlite')
 
 
@@ -27,7 +28,7 @@ def select_3_2():
                            WHERE date(usage_time)="{}"'''.format(str(date)))
     hours = dict()
     for hour in range(24):
-        hours_occupied = '{:02}h-{:02}h'.format(hour, hour+1)
+        hours_occupied = '{:02}h-{:02}h'.format(hour, hour + 1)
         hours[hours_occupied] = 0
         for socket in occupied:
             duration = socket[1]
@@ -87,7 +88,51 @@ def select_3_6():
     compute top-3 most popular pick-up locations and travel destination
     for each time of day: morning (7am-10am), afternoon (12am-2pm) and evening (5pm-7pm).
     """
-    pass
+    places = db.query('''SELECT *
+    FROM(
+    SELECT * FROM(SELECT DISTINCT source_location AS morning_pick_up
+                    FROM rides 
+                    WHERE time(start_ride_time) BETWEEN 7 AND 10
+                    GROUP BY source_location 
+                    ORDER BY count(source_location) DESC
+                    LIMIT 3)
+    UNION
+    SELECT * FROM(SELECT DISTINCT source_location AS afternoon_pick_up
+                    FROM rides 
+                    WHERE time(start_ride_time) BETWEEN 7 AND 10
+                    GROUP BY source_location 
+                    ORDER BY count(source_location) DESC
+                    LIMIT 3)
+    UNION
+    SELECT * FROM(SELECT DISTINCT source_location AS evening_pick_up
+                    FROM rides 
+                    WHERE time(start_ride_time) BETWEEN 7 AND 10
+                    GROUP BY source_location 
+                    ORDER BY count(source_location) DESC
+                    LIMIT 3)
+    UNION
+    SELECT * FROM(SELECT DISTINCT source_location AS morning_destination
+                    FROM rides 
+                    WHERE time(end_ride_time) BETWEEN 7 AND 10
+                    GROUP BY destination
+                    ORDER BY count(destination) DESC
+                    LIMIT 3)
+    UNION
+    SELECT * FROM(SELECT DISTINCT source_location AS afternoon_destination
+                    FROM rides 
+                    WHERE time(end_ride_time) BETWEEN 7 AND 10
+                    GROUP BY destination
+                    ORDER BY count(destination) DESC
+                    LIMIT 3)
+    UNION
+    SELECT * FROM(SELECT DISTINCT source_location AS evening_destination
+                    FROM rides 
+                    WHERE time(end_ride_time) BETWEEN 7 AND 10
+                    GROUP BY destination
+                    ORDER BY count(destination) DESC
+                    LIMIT 3))
+      ;''')
+    return places
 
 
 @intro
@@ -131,7 +176,6 @@ def select_3_9():
     from providers for every workshop. Help them decide which parts are used the
     most every week by every workshop and compute the necessary amount of parts to order.
     """
-    pass
 
 
 @intro

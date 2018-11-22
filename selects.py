@@ -176,7 +176,7 @@ def select_3_9():
     from providers for every workshop. Help them decide which parts are used the
     most every week by every workshop and compute the necessary amount of parts to order.
     """
-
+    pass
 
 @intro
 def select_3_10():

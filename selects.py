@@ -160,7 +160,20 @@ def select_3_7():
     cars. The management decided to stop using 10% of all self-driving cars,
     which take least amount of orders for the last 3 months.
     """
-    pass
+    cars_ten = db.query('''
+    WITH cars_stats AS(SELECT c.carid, COUNT(c.carid) AS times_used, row_number() over(ORDER BY COUNT(c.carid) asc) 
+    AS row_num, tc.total_cars FROM cars AS c LEFT 
+    JOIN rides AS r ON c.carid = r.carid CROSS 
+    JOIN(
+    SELECT COUNT(cr.carid) AS total_cars
+    FROM cars AS cr) AS tc
+    GROUP BY c.carid)
+    SELECT cs.carid, cs.times_used
+    FROM cars_stats as cs
+    WHERE (cs.row_num / cs.total_cars) * 100 <= 10
+''')
+
+    return cars_ten
 
 
 @intro

@@ -75,16 +75,16 @@ db.insert_into('cars', carid=len(plates), plate='AN123', color='Red', current_st
 #                    destination=destination, cid=cid, start_ride_time=start_ride_time, end_ride_time=end_ride_time,
 #                    carid=carid)
 db.insert_into('rides', initial_car_location='1', source_location='2',
-                     destination='3', cid=1, start_ride_time=datetime(2018, 10, 5, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 5, 3, random.randint(0, 59), 0),
+                     destination='3', cid=1, distance=random.randint(1, 100), start_ride_time=datetime(2018, 10, 5, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 5, 3, random.randint(0, 59), 0),
                      carid=7)
 db.insert_into('rides', initial_car_location='1', source_location='2',
-                     destination='3', cid=1, start_ride_time=datetime(2018, 10, 6, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 6, 3, random.randint(0, 59), 0),
+                     destination='3', cid=1, distance=random.randint(1, 100),start_ride_time=datetime(2018, 10, 6, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 6, 3, random.randint(0, 59), 0),
                      carid=9)
 db.insert_into('rides', initial_car_location='1', source_location='2',
-                     destination='3', cid=1, start_ride_time=datetime(2018, 10, 7, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 7, 3, random.randint(0, 59), 0),
+                     destination='3', cid=1, distance=random.randint(1, 100),start_ride_time=datetime(2018, 10, 7, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 7, 3, random.randint(0, 59), 0),
                      carid=10)
 db.insert_into('rides', initial_car_location='1', source_location='2',
-                     destination='3', cid=2, start_ride_time=datetime(2018, 10, 6, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 6, 3, random.randint(0, 59), 0),
+                     destination='3', cid=2, distance=random.randint(1, 100),start_ride_time=datetime(2018, 10, 6, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 6, 3, random.randint(0, 59), 0),
                      carid=10)
 
 

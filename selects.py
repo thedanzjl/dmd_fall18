@@ -77,7 +77,24 @@ def select_3_5():
     - Average trip duration
     Given a date as an input, compute the statistics above.
     """
-    pass
+    average_distance = db.query('''
+        WITH cars_traveled_stats AS (
+        SELECT c.carid, SUM(r.distance) AS traveled_total, 
+        julianday(r.end_ride_time) - julianday(r.start_ride_time) AS days_traveled
+        FROM cars AS c
+        JOIN
+        rides AS r ON r.carid = c.carid
+        GROUP BY c.carid
+    )
+    SELECT cts.carid, cts.traveled_total / cts.days_traveled AS aver_traveled_per_day FROM cars_traveled_stats AS cts;
+    ''')
+
+    average_trip_duration = db.query('''
+    SELECT sum(julianday(r.end_ride_time) - julianday(r.start_ride_time)) / count(r.rid) AS aver_trip_dur_days
+    FROM rides AS r;
+    ''')
+
+    return average_distance, average_trip_duration
 
 
 @intro
@@ -160,13 +177,13 @@ def select_3_8():
     date = MyDate(2018, 10, 1)
     datemax = MyDate(date.y, date.m+1, date.d)
 
-    within_month = db.query('''select cid, count(cid) from (select carid, cid from (select * from (((select usage_time, carid from cars_charged) natural join (select start_ride_time, carid, cid from rides where date(start_ride_time)>"{}" and date(start_ride_time)<"{}")))) where date(usage_time) = date(start_ride_time)) group by cid
+    within_month = db.query('''select cid, count(cid) from (select carid, cid from (select * from (((select usage_time, 
+    carid from cars_charged) natural join (select start_ride_time, carid, cid from rides where 
+    date(start_ride_time)>"{}" and date(start_ride_time)<"{}")))) where date(usage_time) = date(start_ride_time)) 
+    group by cid
 '''.format(str(date),str(datemax)))
 
     return(within_month)
-
-
-
 
 
 @intro

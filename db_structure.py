@@ -35,6 +35,7 @@ db.exec('''
         end_ride_time TIMESTAMP,
         carid INTEGER, 
         cid INTEGER,
+        distance INTEGER,
         FOREIGN KEY (carid) REFERENCES cars(carid),
         FOREIGN KEY (cid) REFERENCES customers(cid),
         PRIMARY KEY (carid, cid, start_ride_time)

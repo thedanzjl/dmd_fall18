@@ -17,13 +17,13 @@ def select_3_1():
 
 
 @intro
-def select_3_2():
+def select_3_2(year, month, day):
     """
     Company management wants to get a statistics on the efficiency of
     charging stations utilization. Given a date, compute how many sockets
     were occupied each hour.
     """
-    date = MyDate(2018, 11, 8)
+    date = MyDate(year, month, day)
     occupied = db.query('''SELECT usage_time, charging_time_amount FROM cars_charged 
                            WHERE date(usage_time)="{}"'''.format(str(date)))
     hours = dict()
@@ -37,8 +37,10 @@ def select_3_2():
             if (h == hour) or (h == hour - 1 and m + duration >= 60):
                 hours[hours_occupied] += 1
 
-    return hours
-
+    out = ''
+    for key, value in hours.items():
+        out += str(key) + ': ' + str(value) + '\n'
+    return(out)
 
 @intro
 def select_3_3():
@@ -177,17 +179,17 @@ def select_3_7():
 
 
 @intro
-def select_3_8():
+def select_3_8(year, month, day):
     """
     The company management decided to participate in the research on “does customer
     location of residence depend on how many charging station the self-driving cars
     was using the same day”. Now you as DB developer need to provide this data.
     You’ve decided to collect the data for each day within one month and then sum them up.
-    Example INPUT:
-    starting date (e.g 1.10.2017)
+
+    input: year, month, day
     """
 
-    date = MyDate(2018, 10, 1)
+    date = MyDate(year, month, day)
     datemax = MyDate(date.y, date.m+1, date.d)
 
     within_month = db.query('''select cid, count(cid) from (select carid, cid from (select * from (((select usage_time, 
@@ -196,7 +198,10 @@ def select_3_8():
     group by cid
 '''.format(str(date),str(datemax)))
 
-    return(within_month)
+    out = 'customer id, amount:'
+    for i in within_month:
+        out += '\n' + str(i[0]) + ', ' + str(i[1])
+    return out
 
 
 @intro
@@ -220,12 +225,12 @@ def select_3_10():
 
 if __name__ == '__main__':
     select_3_1()
-    select_3_2()
+    select_3_2(2018, 11, 16)
     select_3_3()
     select_3_4()
-    select_3_5()
-    select_3_6()
-    select_3_7()
-    select_3_8()
+ #   select_3_5()
+ #   select_3_6()
+ #   select_3_7()
+    select_3_8(2018, 10, 1)
     select_3_9()
     select_3_10()

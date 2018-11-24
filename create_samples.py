@@ -70,9 +70,10 @@ for _ in range(N):
     end_ride_time = datetime(2018, int(start_ride_time.month), int(start_ride_time.day), random.randint(2, 3), random.randint(0, 59), 0)
     carid = random.randint(0, N - 1)
     cid = random.randint(0, N - 1)
+    distance = random.randint(1, 100)
 
     db.insert_into('rides', initial_car_location=initial_location, source_location=source_location,
-                   destination=destination, cid=cid, start_ride_time=start_ride_time, end_ride_time=end_ride_time,
+                   destination=destination, cid=cid, distance=distance, start_ride_time=start_ride_time, end_ride_time=end_ride_time,
                    carid=carid)
 db.insert_into('rides', initial_car_location='1', source_location='2',
                      destination='3', cid=1, distance=random.randint(1, 100), start_ride_time=datetime(2018, 10, 5, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 5, 3, random.randint(0, 59), 0),

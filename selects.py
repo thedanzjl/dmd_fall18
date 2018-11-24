@@ -118,14 +118,14 @@ def select_3_6():
     UNION
     SELECT * FROM(SELECT DISTINCT source_location AS afternoon_pick_up
                     FROM rides 
-                    WHERE time(start_ride_time) BETWEEN 7 AND 10
+                    WHERE time(start_ride_time) BETWEEN 12 AND 14
                     GROUP BY source_location 
                     ORDER BY count(source_location) DESC
                     LIMIT 3)
     UNION
     SELECT * FROM(SELECT DISTINCT source_location AS evening_pick_up
                     FROM rides 
-                    WHERE time(start_ride_time) BETWEEN 7 AND 10
+                    WHERE time(start_ride_time) BETWEEN 17 AND 19
                     GROUP BY source_location 
                     ORDER BY count(source_location) DESC
                     LIMIT 3)
@@ -139,14 +139,14 @@ def select_3_6():
     UNION
     SELECT * FROM(SELECT DISTINCT source_location AS afternoon_destination
                     FROM rides 
-                    WHERE time(end_ride_time) BETWEEN 7 AND 10
+                    WHERE time(end_ride_time) BETWEEN 12 AND 14
                     GROUP BY destination
                     ORDER BY count(destination) DESC
                     LIMIT 3)
     UNION
     SELECT * FROM(SELECT DISTINCT source_location AS evening_destination
                     FROM rides 
-                    WHERE time(end_ride_time) BETWEEN 7 AND 10
+                    WHERE time(end_ride_time) BETWEEN 17 AND 19
                     GROUP BY destination
                     ORDER BY count(destination) DESC
                     LIMIT 3))

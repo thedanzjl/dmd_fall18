@@ -192,10 +192,14 @@ def select_3_8(year, month, day):
     date = MyDate(year, month, day)
     datemax = MyDate(date.y, date.m+1, date.d)
 
-    within_month = db.query('''select cid, count(cid) from (select carid, cid from (select * from (((select usage_time, 
-    carid from cars_charged) natural join (select start_ride_time, carid, cid from rides where 
-    date(start_ride_time)>"{}" and date(start_ride_time)<"{}")))) where date(usage_time) = date(start_ride_time)) 
-    group by cid
+    within_month = db.query('''select cid, count(cid) from 
+    (select carid, cid from 
+    ((select usage_time, carid from
+     cars_charged) 
+     natural join
+      (select start_ride_time, carid, cid from 
+      rides where date(start_ride_time)>"{}" and date(start_ride_time)<"{}"))
+      where date(usage_time) = date(start_ride_time)) group by cid
 '''.format(str(date),str(datemax)))
 
     out = 'customer id, amount:'
@@ -212,7 +216,6 @@ def select_3_9():
     most every week by every workshop and compute the necessary amount of parts to order.
     """
     pass
-
 @intro
 def select_3_10():
     """
@@ -220,17 +223,44 @@ def select_3_10():
     car to maintain. Find out which car type has had the highest average (per day)
     cost of repairs and charging (combined).
     """
-    pass
+    # a = db.query('''select carid, repair_exp_per_day+charge_exp_per_day from
+    # (select carid, sum(sp)/count(days) as repair_exp_per_day  from
+    # (select carid, sum(price) as sp, date(date_of_repair) as days
+    # from cars_repaired group by date(date_of_repair), carid order by carid) group by carid)
+    # natural join
+    #               (select carid, sum(sp)/count(days) as charge_exp_per_day  from
+    #               (select carid, sum(price) as sp, date(usage_time) as days from
+    #               cars_charged group by date(usage_time), carid order by carid) group by carid)''')
+    a = db.query('''
+select * from
+(select carid, sum(sp)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
+left join
+(select carid, sum(sp)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
+on t1.carid = t2.carid
+union all
+select * from(select carid, sum(sp)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
+left join
+(select carid, sum(sp)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
+on t1.carid = t2.carid where t2.carid is NULL
+''')
+    b = []
+    print(a)
 
+
+    # out = 'carid, expenses \n'
+    # for i in a:
+    #     out+=str(i[0]) + ': ' + str(i[1]) + '\n'
+    #
+    # return(out)
 
 if __name__ == '__main__':
     select_3_1()
     select_3_2(2018, 11, 16)
     select_3_3()
-    select_3_4()
-    select_3_5()
-    select_3_6()
-    select_3_7()
+    # select_3_4()
+    # select_3_5()
+    # select_3_6()
+    # select_3_7()
     select_3_8(2018, 10, 1)
     select_3_9()
     select_3_10()

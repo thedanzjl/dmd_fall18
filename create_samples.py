@@ -5,6 +5,9 @@ from interface import Database
 
 db = Database("db.sqlite")
 db.clear_all()
+db.insert_into('cars_repaired', carid='1', date_of_repair=datetime(2018, 5, 25, random.randint(0, 23), random.randint(0, 59), 0), wid='11', price=12)
+db.insert_into('cars_repaired', carid='10', date_of_repair=datetime(2018, 5, 27, random.randint(0, 23), random.randint(0, 59), 0), wid='11', price=12)
+db.insert_into('car_types', cartype='sedan', carid=10)
 
 
 # INSERTING customers SAMPLES
@@ -92,11 +95,10 @@ db.insert_into('rides', initial_car_location='1', source_location='2',
 # INSERTING cars_charged SAMPLES
 
 for carid in range(N):
-    for csid in range(N):
-        usage_time = datetime(2018, random.randint(1, 12), random.randint(1, 28), random.randint(0, 12), random.randint(0, 59), 0)
-        charging_time_amount = random.randint(10, 60)
-        price = random.randint(100, 500)
-        db.insert_into('cars_charged', carid=carid, csid=csid, usage_time=usage_time,
+    usage_time = datetime(2018, random.randint(1, 12), random.randint(1, 28), random.randint(0, 12), random.randint(0, 59), 0)
+    charging_time_amount = random.randint(10, 60)
+    price = random.randint(100, 500)
+    db.insert_into('cars_charged', carid=carid, csid=random.randint(0,10), usage_time=usage_time,
                        charging_time_amount=charging_time_amount, price=price)
 
 db.insert_into('cars_charged', carid=7, csid=2, usage_time=datetime(2018, 10, 5, 5, random.randint(0, 59), 0),
@@ -161,15 +163,14 @@ for id, name in enumerate(workshops):
 # INSERTING workshops_sell_car_parts SAMPLES
 
 for cpid in range(len(car_parts)):
-    for wid in range(len(workshops)):
-        if random.randint(0, 1):
-            selltime = datetime(2018, 11, 16, random.randint(0, 1), random.randint(0, 59), 0)
-        else:
-            selltime = None
-        amount = random.randint(0, 30)
-        price = random.randint(500, 10000)
+    if random.randint(0, 1):
+        selltime = datetime(2018, 11, 16, random.randint(0, 1), random.randint(0, 59), 0)
+    else:
+        selltime = None
+    amount = random.randint(0, 30)
+    price = random.randint(500, 10000)
 
-        db.insert_into('workshops_sell_car_parts', wid=wid, cpid=cpid, selltime=selltime, amount=amount, price=price)
+    db.insert_into('workshops_sell_car_parts', wid=random.randint(0,len(workshops)), cpid=cpid, selltime=selltime, amount=amount, price=price)
 
 
 # INSERTING providers_provide_car_parts SAMPLES
@@ -183,10 +184,9 @@ for pid in range(N):
 # INSERTING cars_repaired SAMPLES
 
 for carid in range(N):
-    for wid in range(len(workshops)):
-        price = random.randint(1000, 50000)
-        if random.randint(0, 1):
-            db.insert_into('cars_repaired', carid=carid, wid=wid, price=price)
+    price = random.randint(1000, 50000)
+    date_of_repair = datetime(2018, random.randint(1,12), random.randint(1, 28), random.randint(0, 23), random.randint(0, 59), 0)
+    db.insert_into('cars_repaired', carid=carid, date_of_repair=date_of_repair, wid=random.randint(0,len(workshops)), price=price)
 
 
 # INSERTING cars_have_car_parts SAMPLES
@@ -211,6 +211,13 @@ for payid in range(N):
     paytime = datetime(2018, random.randint(1, 11), random.randint(1, 10), random.randint(0, 12), random.randint(0, 59), 0)
     amount = random.randint(100, 700)
     db.insert_into('payments', payid=payid, cid=cid, paytime=paytime, amount=amount)
+
+#inserting cartypes
+
+cartypes = ['sedan', 'SUV', 'hatchback', 'van']
+for i in range(N):
+    db.insert_into('car_types', cartype=random.choice(cartypes), carid=i)
+
 
 # close database
 del db

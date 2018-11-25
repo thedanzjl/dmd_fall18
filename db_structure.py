@@ -118,7 +118,8 @@ db.exec('''
     carid INTEGER, 
     wid INTEGER,
     price INTEGER, 
-    PRIMARY KEY (carid, wid)
+    date_of_repair DATETIME,
+    PRIMARY KEY (carid, wid, date_of_repair)
     )
 ''')
 
@@ -146,6 +147,16 @@ db.exec('''
     charging_time_amount INTEGER, 
     price INTEGER, 
     PRIMARY KEY (carid, csid, usage_time)
+    )
+''')
+
+db.exec('''
+    CREATE TABLE IF NOT EXISTS car_types (
+    carid INTEGER,
+    cartype VARCHAR(10), 
+    foreign key (carid) references cars(carid),
+    
+    PRIMARY KEY (carid, cartype)
     )
 ''')
 

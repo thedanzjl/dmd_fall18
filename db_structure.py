@@ -101,7 +101,9 @@ db.exec('''
     selltime DATETIME NULL, 
     amount INTEGER,
     price INTEGER,
-    PRIMARY KEY (wid, cpid)
+    PRIMARY KEY (wid, cpid), 
+    FOREIGN KEY (wid) REFERENCES workshops(wid),
+    FOREIGN KEY (cpid) REFERENCES car_part_types(cpid)
     )
 ''')
 
@@ -109,7 +111,9 @@ db.exec('''
     CREATE TABLE IF NOT EXISTS providers_provide_car_parts (
     pid INTEGER, 
     cpid INTEGER, 
-    PRIMARY KEY (pid, cpid)
+    PRIMARY KEY (pid, cpid), 
+    FOREIGN KEY (pid) REFERENCES providers(pid),
+    FOREIGN KEY (cpid) REFERENCES car_part_types(cpid)
     )
 ''')
 
@@ -118,7 +122,9 @@ db.exec('''
     carid INTEGER, 
     wid INTEGER,
     price INTEGER, 
-    PRIMARY KEY (carid, wid)
+    PRIMARY KEY (carid, wid), 
+    FOREIGN KEY (carid) REFERENCES cars(carid),
+    FOREIGN KEY (wid) REFERENCES workshops(wid)
     )
 ''')
 
@@ -126,7 +132,9 @@ db.exec('''
     CREATE TABLE IF NOT EXISTS cars_have_car_parts (
     carid INTEGER,
     cpid INTEGER, 
-    PRIMARY KEY (carid, cpid)
+    PRIMARY KEY (carid, cpid), 
+    FOREIGN KEY (carid) REFERENCES cars(carid),
+    FOREIGN KEY (cpid) REFERENCES car_part_types(cpid)
     )
 ''')
 
@@ -134,7 +142,9 @@ db.exec('''
     CREATE TABLE IF NOT EXISTS charging_stations_suits_plug_types (
     ptid INTEGER, 
     csid INTEGER, 
-    PRIMARY KEY (ptid, csid)
+    PRIMARY KEY (ptid, csid), 
+    FOREIGN KEY (ptid) REFERENCES plug_types(ptid),
+    FOREIGN KEY (csid) REFERENCES charging_stations(csid)
     )
 ''')
 
@@ -145,7 +155,9 @@ db.exec('''
     usage_time DATETIME,
     charging_time_amount INTEGER, 
     price INTEGER, 
-    PRIMARY KEY (carid, csid, usage_time)
+    PRIMARY KEY (carid, csid, usage_time), 
+    FOREIGN KEY (carid) REFERENCES cars(carid),
+    FOREIGN KEY (csid) REFERENCES charging_stations(csid)
     )
 ''')
 

@@ -161,11 +161,8 @@ for id, name in enumerate(workshops):
 # INSERTING workshops_sell_car_parts SAMPLES
 
 for cpid in range(len(car_parts)):
-    if random.randint(0, 1):
-        selltime = datetime(2018, 11, 16, random.randint(0, 1), random.randint(0, 59), 0)
-    else:
-        selltime = None
-    amount = random.randint(0, 30)
+    selltime = datetime(2018, random.randint(1,12), random.randint(1,21), random.randint(0, 23), random.randint(0, 59), 0)
+    amount = random.randint(1, 30)
     price = random.randint(500, 10000)
 
     db.insert_into('workshops_sell_car_parts', wid=random.randint(0,len(workshops)), cpid=cpid, selltime=selltime, amount=amount, price=price)

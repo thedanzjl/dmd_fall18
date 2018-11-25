@@ -18,11 +18,11 @@ db.exec('''
 
 db.exec('''
     CREATE TABLE IF NOT EXISTS payments (
-    payid INTEGER PRIMARY KEY,
-    cid INTEGER,
-    paytime DATETIME,
-    amount INTEGER, 
-    FOREIGN KEY (cid) REFERENCES customers(cid)
+        payid INTEGER PRIMARY KEY,
+        cid INTEGER,
+        paytime DATETIME,
+        amount INTEGER, 
+        FOREIGN KEY (cid) REFERENCES customers(cid)
     )
 ''')
 
@@ -50,15 +50,27 @@ db.exec('''
         current_state VARCHAR(20),
         battery_level INTEGER,
         location VARCHAR(40), 
-        ptid INTEGER,
-        FOREIGN KEY (ptid) REFERENCES plug_types(ptid))                          
+        ctid INTEGER,
+        foreign key (ctid) references car_types(ctid)
+        )                          
 ''')
 
 db.exec('''
     CREATE TABLE IF NOT EXISTS plug_types (
         ptid INTEGER PRIMARY KEY,
         shape VARCHAR(20),
-        size INTEGER)                  
+        size INTEGER
+        )                  
+''')
+
+db.exec('''
+    CREATE TABLE IF NOT EXISTS car_types (
+        ctid INTEGER primary key,
+        ctname VARCHAR(10), 
+        ptid INTEGER,
+        foreign key (ptid) references plug_types(ptid)
+        
+    )
 ''')
 
 db.exec('''
@@ -66,7 +78,8 @@ db.exec('''
         csid INTEGER PRIMARY KEY,
         location VARCHAR(40),
         price INTEGER,
-        amount_of_sockets INTEGER)                  
+        amount_of_sockets INTEGER
+        )                  
 ''')
 
 db.exec('''
@@ -101,7 +114,7 @@ db.exec('''
     selltime DATETIME NULL, 
     amount INTEGER,
     price INTEGER,
-    PRIMARY KEY (wid, cpid), 
+    PRIMARY KEY (wid, cpid, selltime), 
     FOREIGN KEY (wid) REFERENCES workshops(wid),
     FOREIGN KEY (cpid) REFERENCES car_parts(cpid)
     )
@@ -130,11 +143,11 @@ db.exec('''
 ''')
 
 db.exec('''
-    CREATE TABLE IF NOT EXISTS cars_have_car_parts (
-    carid INTEGER,
+    CREATE TABLE IF NOT EXISTS ctypes_have_car_parts (
+    ctid INTEGER,
     cpid INTEGER, 
-    PRIMARY KEY (carid, cpid), 
-    FOREIGN KEY (carid) REFERENCES cars(carid),
+    PRIMARY KEY (ctid, cpid), 
+    FOREIGN KEY (ctid) REFERENCES car_types(ctid),
     FOREIGN KEY (cpid) REFERENCES car_parts(cpid)
     )
 ''')
@@ -162,15 +175,6 @@ db.exec('''
     )
 ''')
 
-db.exec('''
-    CREATE TABLE IF NOT EXISTS car_types (
-    carid INTEGER,
-    cartype VARCHAR(10), 
-    foreign key (carid) references cars(carid),
-    
-    PRIMARY KEY (carid, cartype)
-    )
-''')
 
 del db
 

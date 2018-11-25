@@ -215,7 +215,8 @@ def select_3_9():
     from providers for every workshop. Help them decide which parts are used the
     most every week by every workshop and compute the necessary amount of parts to order.
     """
-    pass
+    # our workshops sell parts (and install them), so we will find the best selling part per week
+
 @intro
 def select_3_10():
     """
@@ -223,15 +224,10 @@ def select_3_10():
     car to maintain. Find out which car type has had the highest average (per day)
     cost of repairs and charging (combined).
     """
-    # a = db.query('''select carid, repair_exp_per_day+charge_exp_per_day from
-    # (select carid, sum(sp)/count(days) as repair_exp_per_day  from
-    # (select carid, sum(price) as sp, date(date_of_repair) as days
-    # from cars_repaired group by date(date_of_repair), carid order by carid) group by carid)
-    # natural join
-    #               (select carid, sum(sp)/count(days) as charge_exp_per_day  from
-    #               (select carid, sum(price) as sp, date(usage_time) as days from
-    #               cars_charged group by date(usage_time), carid order by carid) group by carid)''')
-    a = db.query('''
+
+    a = db.query('''select ctid, max(sum) from 
+    (select  sum(charge_exp_per_day + ifnull(repair_exp_per_day,0))/count(ctid) as sum, ctid from
+    (
 select * from
 (select carid, sum(sp)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
 left join
@@ -241,17 +237,16 @@ union all
 select * from(select carid, sum(sp)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
 left join
 (select carid, sum(sp)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
-on t1.carid = t2.carid where t2.carid is NULL
+on t1.carid = t2.carid where t2.carid is NULL 
+    )
+        natural join cars group by ctid)
 ''')
-    b = []
-    print(a)
 
+    out = 'cartype, average expenses per day \n'
+    for i in a:
+        out+=str(i[0]) + ': ' + str(i[1]) + '\n'
 
-    # out = 'carid, expenses \n'
-    # for i in a:
-    #     out+=str(i[0]) + ': ' + str(i[1]) + '\n'
-    #
-    # return(out)
+    return(out)
 
 if __name__ == '__main__':
     select_3_1()

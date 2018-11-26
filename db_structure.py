@@ -26,6 +26,9 @@ db.exec('''
     )
 ''')
 
+# distance depends on source_location and destination, so it may be transitive dependence,
+# but in real system we would have function that calculate that distance based on those values.
+# Since we haven't such function we add this redundant attribute.
 db.exec('''
     CREATE TABLE IF NOT EXISTS rides (
         initial_car_location VARCHAR(40),

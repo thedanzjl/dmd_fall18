@@ -50,25 +50,79 @@ def select_3_3():
     (% to the total amount of taxis) during the morning (7AM - 10 AM),
     afternoon (12AM - 2PM) and evening (5PM - 7PM) time.
     """
-    pass
+    amount_morning = db.query('''
+    SELECT
+    CAST(count(distinct carid) AS REAL) / (SELECT count() FROM cars) * 100
+    AS percentage FROM rides
+    WHERE CAST(strftime('%H', start_ride_time) AS INTEGER) >= 7 
+    AND CAST(strftime('%H', start_ride_time) AS INTEGER) < 10
+    AND DATE(start_ride_time) >= DATE('given_date')
+    AND DATE(start_ride_time) < DATE('given_date', '+7 days');
+    ''')
+
+    amount_afternoon = db.query('''
+    SELECT
+    CAST(count(distinct carid) AS REAL) / (SELECT count() FROM cars) * 100 
+    AS percentage FROM rides
+    WHERE CAST(strftime('%H', start_ride_time) AS INTEGER) >= 12 
+    AND CAST(strftime('%H', start_ride_time) AS INTEGER) < 14
+    AND DATE(start_ride_time) >= DATE('given_date')
+    AND DATE(start_ride_time) < DATE('given_date', '+7 days');
+    ''')
+
+    amount_evening = db.query('''
+    SELECT
+    CAST(count(distinct carid) AS REAL) / (SELECT count() FROM cars) * 100 
+    AS percentage FROM rides
+    WHERE CAST(strftime('%H', start_ride_time) AS INTEGER) >= 17 
+    AND CAST(strftime('%H', start_ride_time) AS INTEGER) < 19
+    AND DATE(start_ride_time) >= DATE('given_date')
+    AND DATE(start_ride_time) < DATE('given_date', '+7 days');
+    ''')
+
+    return amount_morning, amount_afternoon, amount_evening
 
 
 @intro
-def select_3_4():
+def select_3_4(cid):
     """
     A customer claims that he was charged twice for the trip, but he
     can’t say exactly what day it happened (he deleted notification from
     his phone and he is too lazy to ask the bank), so you need to check all
     his payments for the last month to be be sure that nothing was doubled.
     """
-    # cid = 7  # consider customer
-    #     # pays_of_user = db.query('''SELECT paytime, amount FROM payments WHERE cid={}'''.format(cid))
-    #     # for i, pay1 in enumerate(pays_of_user):
-    #     #     for j, pay2 in enumerate(pays_of_user):
-    #     #         if i != j and pay1[0] == pay1[0] and pay2[0] == pay2[0]:
-    #     #             return 'User paid twice at ' + pay1[0]
-    #     # return 'User paid only once'
-    pass
+
+    a = db.query('''
+SELECT cid,
+       abs(num_of_payments_this_month - num_of_rides_this_month) AS delta
+FROM
+  (SELECT count(ptm) AS num_of_payments_this_month,
+          cid
+   FROM
+     (SELECT date(paytime) AS ptm,
+             cid,
+             payid
+      FROM payments
+      WHERE date(paytime) BETWEEN datetime('now', 'start of month') AND datetime('now', 'localtime')
+        AND cid = '{}'))
+NATURAL JOIN
+  (SELECT count(ert) AS num_of_rides_this_month,
+          cid
+   FROM
+     (SELECT date(end_ride_time) AS ert,
+             cid
+      FROM rides
+      WHERE date(end_ride_time) BETWEEN datetime('now', 'start of month') AND datetime('now', 'localtime')
+        AND cid ='{}'))'''.format(cid,cid))
+
+    out = ''
+    if len(a)!=0:
+        if a[0][1] != 0:
+            out+='there is a problem with transactions of customer with id ' + str(a[0][0])
+        else:
+            out+='there are no problems with transactions of customer with id ' + str(a[0][0])
+
+    return out
 
 
 @intro
@@ -163,16 +217,21 @@ def select_3_7():
     which take least amount of orders for the last 3 months.
     """
     cars_ten = db.query('''
-    WITH cars_stats AS(SELECT c.carid, COUNT(c.carid) AS times_used, row_number() over(ORDER BY COUNT(c.carid) asc) 
-    AS row_num, tc.total_cars FROM cars AS c LEFT 
-    JOIN rides AS r ON c.carid = r.carid CROSS 
-    JOIN(
-    SELECT COUNT(cr.carid) AS total_cars
-    FROM cars AS cr) AS tc
-    GROUP BY c.carid)
+    WITH cars_stats AS(
+    SELECT c.carid, count(c.carid) as times_used, tc.total_cars
+    FROM cars AS c
+    LEFT JOIN rides AS r ON c.carid = r.carid
+    CROSS JOIN (
+              SELECT count(cr.carid) AS total_cars
+              FROM cars AS cr) AS tc
+    GROUP BY c.carid), numbered_cars AS(
+    SELECT cs.carid, cs.times_used, cs.total_cars, ( select count(ics.carid)
+           FROM cars_stats AS ics
+           WHERE ics.carid <= cs.carid) AS row_num
+    FROM cars_stats AS cs)
     SELECT cs.carid, cs.times_used
-    FROM cars_stats as cs
-    WHERE (cs.row_num / cs.total_cars) * 100 <= 10
+    FROM numbered_cars AS cs
+    WHERE (cs.row_num / cs.total_cars) * 100 <= 10;
 ''')
 
     return cars_ten
@@ -192,15 +251,25 @@ def select_3_8(year, month, day):
     date = MyDate(year, month, day)
     datemax = MyDate(date.y, date.m+1, date.d)
 
-    within_month = db.query('''select cid, count(cid) from 
-    (select carid, cid from 
-    ((select usage_time, carid from
-     cars_charged) 
-     natural join
-      (select start_ride_time, carid, cid from 
-      rides where date(start_ride_time)>"{}" and date(start_ride_time)<"{}"))
-      where date(usage_time) = date(start_ride_time)) group by cid
-'''.format(str(date),str(datemax)))
+    within_month = db.query('''
+SELECT cid,
+       count(cid)
+FROM
+  (SELECT carid,
+          cid
+   FROM (
+           (SELECT usage_time,
+                   carid
+            FROM cars_charged)
+         NATURAL JOIN
+           (SELECT start_ride_time,
+                   carid,
+                   cid
+            FROM rides
+            WHERE date(start_ride_time)>"{}"
+              AND date(start_ride_time)<"{}"))
+   WHERE date(usage_time) = date(start_ride_time))
+GROUP BY cid'''.format(str(date),str(datemax)))
 
     out = 'customer id, amount:'
     for i in within_month:
@@ -215,7 +284,42 @@ def select_3_9():
     from providers for every workshop. Help them decide which parts are used the
     most every week by every workshop and compute the necessary amount of parts to order.
     """
-    # our workshops sell parts (and install them), so we will find the best selling part per week
+    # our workshops sell parts (and install them), so we will find the best selling part per week in each workshop
+    a = db.query('''
+SELECT wid,
+       cpid,
+       max((cast(AVG AS float)/COUNT)) AS AVG
+FROM
+  (SELECT wid,
+          cpid,
+          count(cpid) AS COUNT,
+          sum(amnt) AS AVG
+   FROM
+     (SELECT wid,
+             cpid,
+             max(amnt) AS amnt,
+             week
+      FROM
+        (SELECT wid,
+                cpid,
+                sum(amount) AS amnt,
+                strftime('%W', selltime) AS week
+         FROM workshops_sell_car_parts
+         GROUP BY wid,
+                  week,
+                  cpid)
+      GROUP BY wid,
+               week)
+   GROUP BY wid,
+            cpid)
+GROUP BY wid
+''')
+    out = 'workshop id, carpart id, avegare number per week\n'
+    for i in a:
+        out+=str(i[0]) + ', ' + str(i[1]) + ', ' + str(i[2]) + '\n'
+
+    return out
+
 
 @intro
 def select_3_10():
@@ -225,26 +329,52 @@ def select_3_10():
     cost of repairs and charging (combined).
     """
 
-    a = db.query('''select ctid, max(sum) from 
-    (select  sum(charge_exp_per_day + ifnull(repair_exp_per_day,0))/count(ctid) as sum, ctid from
-    (
-select * from
-(select carid, sum(sp)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
-left join
-(select carid, sum(sp)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
-on t1.carid = t2.carid
-union all
-select * from(select carid, sum(sp)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
-left join
-(select carid, sum(sp)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
-on t1.carid = t2.carid where t2.carid is NULL 
-    )
-        natural join cars group by ctid)
-''')
+    a = db.query('''
+SELECT ctid,
+       max(SUM)
+FROM
+  (SELECT sum(charge_exp_per_day + cast(ifnull(repair_exp_per_day, 0) AS float))/count(ctid) AS SUM,
+          ctid
+   FROM
+     (SELECT *
+      FROM
+        (SELECT carid,
+                cast(sum(sp) AS float)/count(days) AS charge_exp_per_day from
+           (SELECT carid, sum(price) AS sp, date(usage_time) AS days
+            FROM cars_charged
+            GROUP BY date(usage_time), carid
+            ORDER BY carid)
+         GROUP BY carid) AS t2
+      LEFT JOIN
+        (SELECT carid,
+                cast(sum(sp) AS float)/count(days) AS repair_exp_per_day from
+           (SELECT carid, sum(price) AS sp, date(date_of_repair) AS days
+            FROM cars_repaired
+            GROUP BY date(date_of_repair), carid
+            ORDER BY carid)
+         GROUP BY carid) AS t1 ON t1.carid = t2.carid
+      UNION ALL SELECT * from
+        (SELECT carid, cast(sum(sp) AS float)/count(days) AS repair_exp_per_day from
+           (SELECT carid, sum(price) AS sp, date(date_of_repair) AS days
+            FROM cars_repaired
+            GROUP BY date(date_of_repair), carid
+            ORDER BY carid)
+         GROUP BY carid) AS t1
+      LEFT JOIN
+        (SELECT carid,
+                cast(sum(sp) AS float)/count(days) AS charge_exp_per_day from
+           (SELECT carid, sum(price) AS sp, date(usage_time) AS days
+            FROM cars_charged
+            GROUP BY date(usage_time), carid
+            ORDER BY carid)
+         GROUP BY carid) AS t2 ON t1.carid = t2.carid
+      WHERE t2.carid IS NULL )
+   NATURAL JOIN cars
+   GROUP BY ctid)''')
 
     out = 'cartype, average expenses per day \n'
     for i in a:
-        out+=str(i[0]) + ': ' + str(i[1]) + '\n'
+        out+=str(i[0]) + ', ' + str(i[1]) + '\n'
 
     return(out)
 
@@ -252,10 +382,10 @@ if __name__ == '__main__':
     select_3_1()
     select_3_2(2018, 11, 16)
     select_3_3()
-    # select_3_4()
-    # select_3_5()
-    # select_3_6()
-    # select_3_7()
+    select_3_4(1)
+    select_3_5()
+    select_3_6()
+    select_3_7()
     select_3_8(2018, 10, 1)
     select_3_9()
     select_3_10()

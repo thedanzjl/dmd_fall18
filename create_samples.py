@@ -6,7 +6,6 @@ from interface import Database
 db = Database("db.sqlite")
 db.clear_all()
 
-
 # INSERTING customers SAMPLES
 N = 10
 
@@ -63,11 +62,12 @@ db.insert_into('cars', carid=len(plates), plate='AN123', color='Red', current_st
 # INSERTING rides SAMPLES
 
 for _ in range(N):
+    rid = _- 1
     initial_location = random.choice(locations)
     source_location = random.choice(locations)
     destination = random.choice(locations)
-    start_ride_time = datetime(2018, random.randint(1, 12), random.randint(1, 28), random.randint(0, 1), random.randint(0, 59), 0)
-    end_ride_time = datetime(2018, int(start_ride_time.month), int(start_ride_time.day), random.randint(2, 3), random.randint(0, 59), 0)
+    start_ride_time = datetime(2018, random.randint(1, 12), random.randint(1, 28), random.randint(0, 22), random.randint(0, 59), 0)
+    end_ride_time = datetime(2018, int(start_ride_time.month), int(start_ride_time.day), start_ride_time.hour+1, random.randint(0, 59), 0)
     carid = random.randint(0, N - 1)
     cid = random.randint(0, N - 1)
     distance = random.randint(1, 100)
@@ -88,6 +88,9 @@ db.insert_into('rides', initial_car_location='1', source_location='2',
 db.insert_into('rides', initial_car_location='1', source_location='2',
                      destination='3', cid=2, distance=random.randint(1, 100),start_ride_time=datetime(2018, 10, 6, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 6, 3, random.randint(0, 59), 0),
                      carid=10)
+db.insert_into('rides', initial_car_location='1', source_location='2',
+                      destination='3', cid=1, distance=random.randint(1, 100),start_ride_time=datetime(2018, 11, 5, 0, 0, 1), end_ride_time=datetime(2018, 11, 5, 0, 40, 0),
+                     carid=9)
 
 
 # INSERTING cars_charged SAMPLES
@@ -152,20 +155,21 @@ for id, name in enumerate(providers):
 
 # INSERTING workshops SAMPLES
 
-workshops = ('BestWorkshop', 'MadeInChina', 'CrazyKuzya')
+workshops = ('BestWorkshop', 'MadeInChina', 'CrazyKuzya','CrazyKuzya1''CrazyKuzya2')
 for id, name in enumerate(workshops):
     location = random.choice(locations)
     db.insert_into('workshops', wid=id, name=name, location=location)
 
 
 # INSERTING workshops_sell_car_parts SAMPLES
+for wpid, name in enumerate(workshops):
+    for cpid in range(len(car_parts)):
+        if random.randint(0,1):
+            selltime = datetime(2018, random.randint(1,12), random.randint(1,21), random.randint(0, 23), random.randint(0, 59), 0)
+            amount = random.randint(1, 30)
+            price = random.randint(500, 10000)
 
-for cpid in range(len(car_parts)):
-    selltime = datetime(2018, random.randint(1,12), random.randint(1,21), random.randint(0, 23), random.randint(0, 59), 0)
-    amount = random.randint(1, 30)
-    price = random.randint(500, 10000)
-
-    db.insert_into('workshops_sell_car_parts', wid=random.randint(0,len(workshops)), cpid=cpid, selltime=selltime, amount=amount, price=price)
+            db.insert_into('workshops_sell_car_parts', wid=wpid, cpid=cpid, selltime=selltime, amount=amount, price=price)
 
 
 # INSERTING providers_provide_car_parts SAMPLES
@@ -208,6 +212,8 @@ for payid in range(N):
     paytime = datetime(2018, random.randint(1, 11), random.randint(1, 10), random.randint(0, 12), random.randint(0, 59), 0)
     amount = random.randint(100, 700)
     db.insert_into('payments', payid=payid, cid=cid, paytime=paytime, amount=amount)
+db.insert_into('payments', payid=10, cid=1, paytime=datetime(2018,11,5,1,1,1), amount=250)
+
 
 #inserting cartypes
 
@@ -215,6 +221,16 @@ cartypes = ['type1', 'type2', 'type3', 'type4']
 for i in range(N):
     db.insert_into('car_types', ctname=random.choice(cartypes), ctid = i, ptid = random.randint(0,10))
 
+db.insert_into('workshops_sell_car_parts', wid=0, cpid=1, selltime=datetime(2018,9,13,1,1,1), amount=2, price=1200)
+db.insert_into('workshops_sell_car_parts', wid=0, cpid=2, selltime=datetime(2018,9,10,1,1,1), amount=2, price=1200)
+
+db.insert_into('workshops_sell_car_parts', wid=0, cpid=1, selltime=datetime(2018,1,4,1,1,1), amount=4, price=1200)
+db.insert_into('workshops_sell_car_parts', wid=0, cpid=1, selltime=datetime(2018,1,2,1,1,1), amount=2, price=1200)
+db.insert_into('workshops_sell_car_parts', wid=0, cpid=1, selltime=datetime(2018,1,1,1,1,1), amount=1, price=1200)
+
+db.insert_into('workshops_sell_car_parts', wid=1, cpid=7, selltime=datetime(2018,1,4,1,1,1), amount=4, price=1200)
+db.insert_into('workshops_sell_car_parts', wid=1, cpid=7, selltime=datetime(2018,1,2,1,1,1), amount=2, price=1200)
+db.insert_into('workshops_sell_car_parts', wid=1, cpid=7, selltime=datetime(2018,1,1,1,1,1), amount=1, price=1200)
 
 # close database
 del db

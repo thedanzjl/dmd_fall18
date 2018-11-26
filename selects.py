@@ -92,10 +92,28 @@ def select_3_4(cid):
     his payments for the last month to be be sure that nothing was doubled.
     """
 
-    a = db.query('''select cid, abs(num_of_payments_this_month - num_of_rides_this_month) as delta  from 
-    
-    (select count(ptm) as num_of_payments_this_month, cid from (select date(paytime) as ptm, cid, payid from payments where date(paytime) between datetime('now', 'start of month') AND datetime('now', 'localtime') and cid = '{}')) natural join
-    (select count(ert) as num_of_rides_this_month, cid from (select date(end_ride_time) as ert, cid from rides where date(end_ride_time) between datetime('now', 'start of month') AND datetime('now', 'localtime') and cid ='{}'))'''.format(cid,cid))
+    a = db.query('''
+SELECT cid,
+       abs(num_of_payments_this_month - num_of_rides_this_month) AS delta
+FROM
+  (SELECT count(ptm) AS num_of_payments_this_month,
+          cid
+   FROM
+     (SELECT date(paytime) AS ptm,
+             cid,
+             payid
+      FROM payments
+      WHERE date(paytime) BETWEEN datetime('now', 'start of month') AND datetime('now', 'localtime')
+        AND cid = '{}'))
+NATURAL JOIN
+  (SELECT count(ert) AS num_of_rides_this_month,
+          cid
+   FROM
+     (SELECT date(end_ride_time) AS ert,
+             cid
+      FROM rides
+      WHERE date(end_ride_time) BETWEEN datetime('now', 'start of month') AND datetime('now', 'localtime')
+        AND cid ='{}'))'''.format(cid,cid))
 
     out = ''
     if a[0][1] != 0:
@@ -232,15 +250,25 @@ def select_3_8(year, month, day):
     date = MyDate(year, month, day)
     datemax = MyDate(date.y, date.m+1, date.d)
 
-    within_month = db.query('''select cid, count(cid) from 
-    (select carid, cid from 
-    ((select usage_time, carid from
-     cars_charged) 
-     natural join
-      (select start_ride_time, carid, cid from 
-      rides where date(start_ride_time)>"{}" and date(start_ride_time)<"{}"))
-      where date(usage_time) = date(start_ride_time)) group by cid
-'''.format(str(date),str(datemax)))
+    within_month = db.query('''
+SELECT cid,
+       count(cid)
+FROM
+  (SELECT carid,
+          cid
+   FROM (
+           (SELECT usage_time,
+                   carid
+            FROM cars_charged)
+         NATURAL JOIN
+           (SELECT start_ride_time,
+                   carid,
+                   cid
+            FROM rides
+            WHERE date(start_ride_time)>"{}"
+              AND date(start_ride_time)<"{}"))
+   WHERE date(usage_time) = date(start_ride_time))
+GROUP BY cid'''.format(str(date),str(datemax)))
 
     out = 'customer id, amount:'
     for i in within_month:
@@ -256,7 +284,35 @@ def select_3_9():
     most every week by every workshop and compute the necessary amount of parts to order.
     """
     # our workshops sell parts (and install them), so we will find the best selling part per week in each workshop
-    a = db.query('''select wid, cpid, max((cast(avg as float)/count)) as avg from (select wid, cpid, count(cpid) as count, sum(amnt) as avg from (select wid, cpid, max(amnt) as amnt, week from (select wid, cpid, sum(amount) as amnt, strftime('%W', selltime) as week from workshops_sell_car_parts group by wid, week, cpid) group by wid, week) group by wid, cpid) group by wid''')
+    a = db.query('''
+SELECT wid,
+       cpid,
+       max((cast(AVG AS float)/COUNT)) AS AVG
+FROM
+  (SELECT wid,
+          cpid,
+          count(cpid) AS COUNT,
+          sum(amnt) AS AVG
+   FROM
+     (SELECT wid,
+             cpid,
+             max(amnt) AS amnt,
+             week
+      FROM
+        (SELECT wid,
+                cpid,
+                sum(amount) AS amnt,
+                strftime('%W', selltime) AS week
+         FROM workshops_sell_car_parts
+         GROUP BY wid,
+                  week,
+                  cpid)
+      GROUP BY wid,
+               week)
+   GROUP BY wid,
+            cpid)
+GROUP BY wid
+''')
     out = 'workshop id, carpart id, avegare number per week\n'
     for i in a:
         out+=str(i[0]) + ', ' + str(i[1]) + ', ' + str(i[2]) + '\n'
@@ -272,22 +328,48 @@ def select_3_10():
     cost of repairs and charging (combined).
     """
 
-    a = db.query('''select ctid, max(sum) from 
-    (select  sum(charge_exp_per_day + cast(ifnull(repair_exp_per_day,0) as float))/count(ctid) as sum, ctid from
-    (
-select * from
-(select carid, cast(sum(sp) as float)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
-left join
-(select carid, cast(sum(sp) as float)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
-on t1.carid = t2.carid
-union all
-select * from(select carid, cast(sum(sp) as float)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
-left join
-(select carid, cast(sum(sp) as float)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
-on t1.carid = t2.carid where t2.carid is NULL 
-    )
-        natural join cars group by ctid)
-''')
+    a = db.query('''
+SELECT ctid,
+       max(SUM)
+FROM
+  (SELECT sum(charge_exp_per_day + cast(ifnull(repair_exp_per_day, 0) AS float))/count(ctid) AS SUM,
+          ctid
+   FROM
+     (SELECT *
+      FROM
+        (SELECT carid,
+                cast(sum(sp) AS float)/count(days) AS charge_exp_per_day from
+           (SELECT carid, sum(price) AS sp, date(usage_time) AS days
+            FROM cars_charged
+            GROUP BY date(usage_time), carid
+            ORDER BY carid)
+         GROUP BY carid) AS t2
+      LEFT JOIN
+        (SELECT carid,
+                cast(sum(sp) AS float)/count(days) AS repair_exp_per_day from
+           (SELECT carid, sum(price) AS sp, date(date_of_repair) AS days
+            FROM cars_repaired
+            GROUP BY date(date_of_repair), carid
+            ORDER BY carid)
+         GROUP BY carid) AS t1 ON t1.carid = t2.carid
+      UNION ALL SELECT * from
+        (SELECT carid, cast(sum(sp) AS float)/count(days) AS repair_exp_per_day from
+           (SELECT carid, sum(price) AS sp, date(date_of_repair) AS days
+            FROM cars_repaired
+            GROUP BY date(date_of_repair), carid
+            ORDER BY carid)
+         GROUP BY carid) AS t1
+      LEFT JOIN
+        (SELECT carid,
+                cast(sum(sp) AS float)/count(days) AS charge_exp_per_day from
+           (SELECT carid, sum(price) AS sp, date(usage_time) AS days
+            FROM cars_charged
+            GROUP BY date(usage_time), carid
+            ORDER BY carid)
+         GROUP BY carid) AS t2 ON t1.carid = t2.carid
+      WHERE t2.carid IS NULL )
+   NATURAL JOIN cars
+   GROUP BY ctid)''')
 
     out = 'cartype, average expenses per day \n'
     for i in a:

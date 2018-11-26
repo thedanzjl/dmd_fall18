@@ -92,8 +92,18 @@ def select_3_4(cid):
     his payments for the last month to be be sure that nothing was doubled.
     """
 
-    within_month = db.query('''select * from payments where cid="{}"'''.format(cid))
-    return within_month
+    a = db.query('''select cid, abs(num_of_payments_this_month - num_of_rides_this_month) as delta  from 
+    
+    (select count(ptm) as num_of_payments_this_month, cid from (select date(paytime) as ptm, cid, payid from payments where date(paytime) between datetime('now', 'start of month') AND datetime('now', 'localtime') and cid = '{}')) natural join
+    (select count(ert) as num_of_rides_this_month, cid from (select date(end_ride_time) as ert, cid from rides where date(end_ride_time) between datetime('now', 'start of month') AND datetime('now', 'localtime') and cid ='{}'))'''.format(cid,cid))
+
+    out = ''
+    if a[0][1] != 0:
+        out+='there is a problem with transactions of customer with id ' + str(a[0][0])
+    else:
+        out+='there are no problems with transactions of customer with id ' + str(a[0][0])
+
+    return out
 
 
 @intro
@@ -246,7 +256,12 @@ def select_3_9():
     most every week by every workshop and compute the necessary amount of parts to order.
     """
     # our workshops sell parts (and install them), so we will find the best selling part per week in each workshop
-    a = db.query('''''')
+    a = db.query('''select wid, cpid, max((cast(avg as float)/count)) as avg from (select wid, cpid, count(cpid) as count, sum(amnt) as avg from (select wid, cpid, max(amnt) as amnt, week from (select wid, cpid, sum(amount) as amnt, strftime('%W', selltime) as week from workshops_sell_car_parts group by wid, week, cpid) group by wid, week) group by wid, cpid) group by wid''')
+    out = 'workshop id, carpart id, avegare number per week\n'
+    for i in a:
+        out+=str(i[0]) + ', ' + str(i[1]) + ', ' + str(i[2]) + '\n'
+
+    return out
 
 
 @intro
@@ -258,17 +273,17 @@ def select_3_10():
     """
 
     a = db.query('''select ctid, max(sum) from 
-    (select  sum(charge_exp_per_day + ifnull(repair_exp_per_day,0))/count(ctid) as sum, ctid from
+    (select  sum(charge_exp_per_day + cast(ifnull(repair_exp_per_day,0) as float))/count(ctid) as sum, ctid from
     (
 select * from
-(select carid, sum(sp)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
+(select carid, cast(sum(sp) as float)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
 left join
-(select carid, sum(sp)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
+(select carid, cast(sum(sp) as float)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
 on t1.carid = t2.carid
 union all
-select * from(select carid, sum(sp)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
+select * from(select carid, cast(sum(sp) as float)/count(days) as repair_exp_per_day from(select carid, sum(price) as sp, date(date_of_repair) as days from cars_repaired group by date(date_of_repair), carid order by carid) group by carid) as t1
 left join
-(select carid, sum(sp)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
+(select carid, cast(sum(sp) as float)/count(days) as charge_exp_per_day from(select carid, sum(price) as sp, date(usage_time) as days from cars_charged group by date(usage_time), carid order by carid) group by carid) as t2
 on t1.carid = t2.carid where t2.carid is NULL 
     )
         natural join cars group by ctid)
@@ -276,7 +291,7 @@ on t1.carid = t2.carid where t2.carid is NULL
 
     out = 'cartype, average expenses per day \n'
     for i in a:
-        out+=str(i[0]) + ': ' + str(i[1]) + '\n'
+        out+=str(i[0]) + ', ' + str(i[1]) + '\n'
 
     return(out)
 

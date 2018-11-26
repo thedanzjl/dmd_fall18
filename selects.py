@@ -54,21 +54,16 @@ def select_3_3():
 
 
 @intro
-def select_3_4():
+def select_3_4(cid):
     """
     A customer claims that he was charged twice for the trip, but he
     can’t say exactly what day it happened (he deleted notification from
     his phone and he is too lazy to ask the bank), so you need to check all
     his payments for the last month to be be sure that nothing was doubled.
     """
-    # cid = 7  # consider customer
-    #     # pays_of_user = db.query('''SELECT paytime, amount FROM payments WHERE cid={}'''.format(cid))
-    #     # for i, pay1 in enumerate(pays_of_user):
-    #     #     for j, pay2 in enumerate(pays_of_user):
-    #     #         if i != j and pay1[0] == pay1[0] and pay2[0] == pay2[0]:
-    #     #             return 'User paid twice at ' + pay1[0]
-    #     # return 'User paid only once'
-    pass
+
+    within_month = db.query('''select * from payments where cid="{}"'''.format(cid))
+    return within_month
 
 
 @intro
@@ -215,7 +210,9 @@ def select_3_9():
     from providers for every workshop. Help them decide which parts are used the
     most every week by every workshop and compute the necessary amount of parts to order.
     """
-    # our workshops sell parts (and install them), so we will find the best selling part per week
+    # our workshops sell parts (and install them), so we will find the best selling part per week in each workshop
+    a = db.query('''''')
+
 
 @intro
 def select_3_10():
@@ -252,7 +249,7 @@ if __name__ == '__main__':
     select_3_1()
     select_3_2(2018, 11, 16)
     select_3_3()
-    # select_3_4()
+    select_3_4(1)
     # select_3_5()
     # select_3_6()
     # select_3_7()

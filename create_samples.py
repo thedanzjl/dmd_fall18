@@ -7,7 +7,7 @@ db = Database("db.sqlite")
 db.clear_all()
 
 # INSERTING customers SAMPLES
-N = 100
+N = 10
 
 names = ['Daniel', 'Roman', 'Mary', 'Nikolay', 'Nikita', 'Subham', 'Joo', 'Manuel']
 locations = ['Universitetskaya 1', 'Sportivnaya 3', 'Sportivnaya 108', 'Kvantovy bulvar 1', 'Centralnaya 5']
@@ -212,7 +212,7 @@ for payid in range(N):
     paytime = datetime(2018, random.randint(1, 11), random.randint(1, 10), random.randint(0, 12), random.randint(0, 59), 0)
     amount = random.randint(100, 700)
     db.insert_into('payments', payid=payid, cid=cid, paytime=paytime, amount=amount)
-db.insert_into('payments', payid=10, cid=1, paytime=datetime(2018,11,5,1,1,1), amount=250)
+db.insert_into('payments', payid=N+1, cid=1, paytime=datetime(2018,11,5,1,1,1), amount=250)
 
 
 #inserting cartypes

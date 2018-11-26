@@ -193,16 +193,21 @@ def select_3_7():
     which take least amount of orders for the last 3 months.
     """
     cars_ten = db.query('''
-    WITH cars_stats AS(SELECT c.carid, COUNT(c.carid) AS times_used, ROWID() over(ORDER BY COUNT(c.carid) asc)
-    AS row_num, tc.total_cars FROM cars AS c LEFT 
-    JOIN rides AS r ON c.carid = r.carid CROSS 
-    JOIN(
-    SELECT COUNT(cr.carid) AS total_cars
-    FROM cars AS cr) AS tc
-    GROUP BY c.carid)
+    WITH cars_stats AS(
+    SELECT c.carid, count(c.carid) as times_used, tc.total_cars
+    FROM cars AS c
+    LEFT JOIN rides AS r ON c.carid = r.carid
+    CROSS JOIN (
+              SELECT count(cr.carid) AS total_cars
+              FROM cars AS cr) AS tc
+    GROUP BY c.carid), numbered_cars AS(
+    SELECT cs.carid, cs.times_used, cs.total_cars, ( select count(ics.carid)
+           FROM cars_stats AS ics
+           WHERE ics.carid <= cs.carid) AS row_num
+    FROM cars_stats AS cs)
     SELECT cs.carid, cs.times_used
-    FROM cars_stats as cs
-    WHERE (cs.row_num / cs.total_cars) * 100 <= 10
+    FROM numbered_cars AS cs
+    WHERE (cs.row_num / cs.total_cars) * 100 <= 10;
 ''')
 
     return cars_ten
@@ -285,7 +290,7 @@ if __name__ == '__main__':
     # select_3_4()
     select_3_5()
     select_3_6()
-    # select_3_7()
+    select_3_7()
     select_3_8(2018, 10, 1)
     select_3_9()
     select_3_10()

@@ -4,12 +4,7 @@ from datetime import datetime
 from interface import Database
 
 db = Database("db.sqlite")
-# db.clear_all()
-db.insert_into('rides', initial_car_location='1', source_location='2',
-                      destination='3', cid=1, distance=random.randint(1, 100),start_ride_time=datetime(2018, 11, 5, 0, 0, 1), end_ride_time=datetime(2018, 11, 5, 0, 40, 0),
-                     carid=9)
-
-
+db.clear_all()
 
 # INSERTING customers SAMPLES
 N = 10
@@ -71,8 +66,8 @@ for _ in range(N):
     initial_location = random.choice(locations)
     source_location = random.choice(locations)
     destination = random.choice(locations)
-    start_ride_time = datetime(2018, random.randint(1, 12), random.randint(1, 28), random.randint(0, 1), random.randint(0, 59), 0)
-    end_ride_time = datetime(2018, int(start_ride_time.month), int(start_ride_time.day), random.randint(2, 3), random.randint(0, 59), 0)
+    start_ride_time = datetime(2018, random.randint(1, 12), random.randint(1, 28), random.randint(0, 22), random.randint(0, 59), 0)
+    end_ride_time = datetime(2018, int(start_ride_time.month), int(start_ride_time.day), start_ride_time.hour+1, random.randint(0, 59), 0)
     carid = random.randint(0, N - 1)
     cid = random.randint(0, N - 1)
     distance = random.randint(1, 100)
@@ -93,6 +88,9 @@ db.insert_into('rides', initial_car_location='1', source_location='2',
 db.insert_into('rides', initial_car_location='1', source_location='2',
                      destination='3', cid=2, distance=random.randint(1, 100),start_ride_time=datetime(2018, 10, 6, 2, random.randint(0, 59), 0), end_ride_time=datetime(2018, 10, 6, 3, random.randint(0, 59), 0),
                      carid=10)
+db.insert_into('rides', initial_car_location='1', source_location='2',
+                      destination='3', cid=1, distance=random.randint(1, 100),start_ride_time=datetime(2018, 11, 5, 0, 0, 1), end_ride_time=datetime(2018, 11, 5, 0, 40, 0),
+                     carid=9)
 
 
 # INSERTING cars_charged SAMPLES
@@ -214,7 +212,7 @@ for payid in range(N):
     paytime = datetime(2018, random.randint(1, 11), random.randint(1, 10), random.randint(0, 12), random.randint(0, 59), 0)
     amount = random.randint(100, 700)
     db.insert_into('payments', payid=payid, cid=cid, paytime=paytime, amount=amount)
-
+db.insert_into('payments', payid=10, cid=1, paytime=datetime(2018,11,5,1,1,1), amount=250)
 
 
 #inserting cartypes

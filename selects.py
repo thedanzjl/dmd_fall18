@@ -116,10 +116,11 @@ NATURAL JOIN
         AND cid ='{}'))'''.format(cid,cid))
 
     out = ''
-    if a[0][1] != 0:
-        out+='there is a problem with transactions of customer with id ' + str(a[0][0])
-    else:
-        out+='there are no problems with transactions of customer with id ' + str(a[0][0])
+    if len(a)!=0:
+        if a[0][1] != 0:
+            out+='there is a problem with transactions of customer with id ' + str(a[0][0])
+        else:
+            out+='there are no problems with transactions of customer with id ' + str(a[0][0])
 
     return out
 

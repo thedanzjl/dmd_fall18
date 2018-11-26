@@ -386,14 +386,15 @@ FROM
 
     out = 'cartype, average expenses per day \n'
     for i in a:
-        out+=str(i[0]) + ', ' + str(i[1]) + '\n'
+        out += str(i[0]) + ', ' + str(i[1]) + '\n'
 
     return out
 
+
 if __name__ == '__main__':
     select_3_1()
-    select_3_2(2018, 11, 16)
-    select_3_3(2018, 11, 16)
+    select_3_2(2018, 10, 16)
+    select_3_3(2018, 10, 5)
     select_3_4(1)
     select_3_5()
     select_3_6()

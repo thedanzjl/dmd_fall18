@@ -66,7 +66,7 @@ for _ in range(N):
     initial_location = random.choice(locations)
     source_location = random.choice(locations)
     destination = random.choice(locations)
-    start_ride_time = datetime(2018, random.randint(1, 12), random.randint(1, 28), random.randint(0, 22), random.randint(0, 59), 0)
+    start_ride_time = datetime(2018, 10, random.randint(5, 10), random.randint(0, 22), random.randint(0, 59), 0)
     end_ride_time = datetime(2018, int(start_ride_time.month), int(start_ride_time.day), start_ride_time.hour+1, random.randint(0, 59), 0)
     carid = random.randint(0, N - 1)
     cid = random.randint(0, N - 1)
@@ -96,7 +96,7 @@ db.insert_into('rides', initial_car_location='1', source_location='2',
 # INSERTING cars_charged SAMPLES
 
 for carid in range(N):
-    usage_time = datetime(2018, random.randint(1, 12), random.randint(1, 28), random.randint(0, 12), random.randint(0, 59), 0)
+    usage_time = datetime(2018, 10, random.randint(5, 16), random.randint(0, 12), random.randint(0, 59), 0)
     charging_time_amount = random.randint(10, 60)
     price = random.randint(100, 500)
     db.insert_into('cars_charged', carid=carid, csid=random.randint(0,10), usage_time=usage_time,
@@ -113,7 +113,6 @@ db.insert_into('cars_charged', carid=9, csid=2, usage_time=datetime(2018, 10, 10
 
 db.insert_into('cars_charged', carid=10, csid=2, usage_time=datetime(2018, 10, 6, 5, random.randint(0, 59), 0),
                       charging_time_amount=20, price=100)
-
 
 
 # INSERTING plug_types SAMPLES
@@ -212,7 +211,7 @@ for payid in range(N):
     paytime = datetime(2018, random.randint(1, 11), random.randint(1, 10), random.randint(0, 12), random.randint(0, 59), 0)
     amount = random.randint(100, 700)
     db.insert_into('payments', payid=payid, cid=cid, paytime=paytime, amount=amount)
-db.insert_into('payments', payid=10, cid=1, paytime=datetime(2018,11,5,1,1,1), amount=250)
+db.insert_into('payments', payid=N, cid=1, paytime=datetime(2018,11,5,1,1,1), amount=250)
 
 
 #inserting cartypes

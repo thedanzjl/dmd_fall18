@@ -50,7 +50,37 @@ def select_3_3():
     (% to the total amount of taxis) during the morning (7AM - 10 AM),
     afternoon (12AM - 2PM) and evening (5PM - 7PM) time.
     """
-    pass
+    amount_morning = db.query('''
+    SELECT
+    CAST(count(distinct carid) AS REAL) / (SELECT count() FROM cars) * 100
+    AS percentage FROM rides
+    WHERE CAST(strftime('%H', start_ride_time) AS INTEGER) >= 7 
+    AND CAST(strftime('%H', start_ride_time) AS INTEGER) < 10
+    AND DATE(start_ride_time) >= DATE('given_date')
+    AND DATE(start_ride_time) < DATE('given_date', '+7 days');
+    ''')
+
+    amount_afternoon = db.query('''
+    SELECT
+    CAST(count(distinct carid) AS REAL) / (SELECT count() FROM cars) * 100 
+    AS percentage FROM rides
+    WHERE CAST(strftime('%H', start_ride_time) AS INTEGER) >= 12 
+    AND CAST(strftime('%H', start_ride_time) AS INTEGER) < 14
+    AND DATE(start_ride_time) >= DATE('given_date')
+    AND DATE(start_ride_time) < DATE('given_date', '+7 days');
+    ''')
+
+    amount_evening = db.query('''
+    SELECT
+    CAST(count(distinct carid) AS REAL) / (SELECT count() FROM cars) * 100 
+    AS percentage FROM rides
+    WHERE CAST(strftime('%H', start_ride_time) AS INTEGER) >= 17 
+    AND CAST(strftime('%H', start_ride_time) AS INTEGER) < 19
+    AND DATE(start_ride_time) >= DATE('given_date')
+    AND DATE(start_ride_time) < DATE('given_date', '+7 days');
+    ''')
+
+    return amount_morning, amount_afternoon, amount_evening
 
 
 @intro
@@ -163,7 +193,7 @@ def select_3_7():
     which take least amount of orders for the last 3 months.
     """
     cars_ten = db.query('''
-    WITH cars_stats AS(SELECT c.carid, COUNT(c.carid) AS times_used, row_number() over(ORDER BY COUNT(c.carid) asc) 
+    WITH cars_stats AS(SELECT c.carid, COUNT(c.carid) AS times_used, ROWID() over(ORDER BY COUNT(c.carid) asc)
     AS row_num, tc.total_cars FROM cars AS c LEFT 
     JOIN rides AS r ON c.carid = r.carid CROSS 
     JOIN(
@@ -253,8 +283,8 @@ if __name__ == '__main__':
     select_3_2(2018, 11, 16)
     select_3_3()
     # select_3_4()
-    # select_3_5()
-    # select_3_6()
+    select_3_5()
+    select_3_6()
     # select_3_7()
     select_3_8(2018, 10, 1)
     select_3_9()

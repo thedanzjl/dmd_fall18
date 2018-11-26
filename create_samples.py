@@ -63,6 +63,7 @@ db.insert_into('cars', carid=len(plates), plate='AN123', color='Red', current_st
 # INSERTING rides SAMPLES
 
 for _ in range(N):
+    rid = _- 1
     initial_location = random.choice(locations)
     source_location = random.choice(locations)
     destination = random.choice(locations)

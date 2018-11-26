@@ -7,7 +7,7 @@ db = Database("db.sqlite")
 db.clear_all()
 
 # INSERTING customers SAMPLES
-N = 10
+N = 100
 
 names = ['Daniel', 'Roman', 'Mary', 'Nikolay', 'Nikita', 'Subham', 'Joo', 'Manuel']
 locations = ['Universitetskaya 1', 'Sportivnaya 3', 'Sportivnaya 108', 'Kvantovy bulvar 1', 'Centralnaya 5']

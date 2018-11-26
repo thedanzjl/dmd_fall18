@@ -43,42 +43,43 @@ def select_3_2(year, month, day):
     return(out)
 
 @intro
-def select_3_3():
+def select_3_3(year, month, day):
     """
     Company management considers using price increasing coefficients.
     They need to gather statistics for one week on how many cars are busy
     (% to the total amount of taxis) during the morning (7AM - 10 AM),
     afternoon (12AM - 2PM) and evening (5PM - 7PM) time.
     """
-    amount_morning = db.query('''
+    date_given = MyDate(year, month, day)
+    amount_morning = db.query(('''
     SELECT
     CAST(count(distinct carid) AS REAL) / (SELECT count() FROM cars) * 100
     AS percentage FROM rides
     WHERE CAST(strftime('%H', start_ride_time) AS INTEGER) >= 7 
     AND CAST(strftime('%H', start_ride_time) AS INTEGER) < 10
-    AND DATE(start_ride_time) >= DATE('given_date')
-    AND DATE(start_ride_time) < DATE('given_date', '+7 days');
-    ''')
+    AND DATE(start_ride_time) >= DATE('{}')
+    AND DATE(start_ride_time) < DATE('{}', '+7 days');
+    ''').format(date_given, date_given))
 
-    amount_afternoon = db.query('''
+    amount_afternoon = db.query(('''
     SELECT
-    CAST(count(distinct carid) AS REAL) / (SELECT count() FROM cars) * 100 
+    CAST(count(DISTINCT carid) AS REAL) / (SELECT count() FROM cars) * 100 
     AS percentage FROM rides
     WHERE CAST(strftime('%H', start_ride_time) AS INTEGER) >= 12 
     AND CAST(strftime('%H', start_ride_time) AS INTEGER) < 14
-    AND DATE(start_ride_time) >= DATE('given_date')
-    AND DATE(start_ride_time) < DATE('given_date', '+7 days');
-    ''')
+    AND DATE(start_ride_time) >= DATE('{}')
+    AND DATE(start_ride_time) < DATE('{}', '+7 days');
+    ''').format(date_given, date_given))
 
-    amount_evening = db.query('''
+    amount_evening = db.query(('''
     SELECT
-    CAST(count(distinct carid) AS REAL) / (SELECT count() FROM cars) * 100 
+    CAST(count(DISTINCT carid) AS REAL) / (SELECT count() FROM cars) * 100 
     AS percentage FROM rides
     WHERE CAST(strftime('%H', start_ride_time) AS INTEGER) >= 17 
     AND CAST(strftime('%H', start_ride_time) AS INTEGER) < 19
-    AND DATE(start_ride_time) >= DATE('given_date')
-    AND DATE(start_ride_time) < DATE('given_date', '+7 days');
-    ''')
+    AND DATE(start_ride_time) >= DATE('{}')
+    AND DATE(start_ride_time) < DATE('{}', '+7 days');
+    ''').format(date_given, date_given))
 
     return amount_morning, amount_afternoon, amount_evening
 
@@ -161,51 +162,62 @@ def select_3_6():
     compute top-3 most popular pick-up locations and travel destination
     for each time of day: morning (7am-10am), afternoon (12am-2pm) and evening (5pm-7pm).
     """
-    places = db.query('''SELECT *
-    FROM(
-    SELECT * FROM(SELECT DISTINCT source_location AS morning_pick_up
+    morning_pick_up = db.query('''
+    SELECT DISTINCT source_location AS morning_pick_up
                     FROM rides 
-                    WHERE time(start_ride_time) BETWEEN 7 AND 10
+                    WHERE CAST(strftime('%H', start_ride_time) AS INTEGER)>= 7 
+                    AND CAST(strftime('%H', start_ride_time) AS INTEGER) <10
                     GROUP BY source_location 
                     ORDER BY count(source_location) DESC
-                    LIMIT 3)
-    UNION
-    SELECT * FROM(SELECT DISTINCT source_location AS afternoon_pick_up
+                    LIMIT 3;
+                    ''')
+
+    afternoon_pick_up = db.query('''
+    SELECT DISTINCT source_location AS afternoon_pick_up
                     FROM rides 
-                    WHERE time(start_ride_time) BETWEEN 12 AND 14
+                    WHERE CAST(strftime('%H', start_ride_time) AS INTEGER)>= 12 
+                    AND CAST(strftime('%H', start_ride_time) AS INTEGER) <14
                     GROUP BY source_location 
                     ORDER BY count(source_location) DESC
-                    LIMIT 3)
-    UNION
-    SELECT * FROM(SELECT DISTINCT source_location AS evening_pick_up
+                    LIMIT 3;
+                    ''')
+    evening_pick_up = db.query('''
+    SELECT DISTINCT source_location AS evening_pick_up
                     FROM rides 
-                    WHERE time(start_ride_time) BETWEEN 17 AND 19
+                    WHERE CAST(strftime('%H', start_ride_time) AS INTEGER)>= 17 
+                    AND CAST(strftime('%H', start_ride_time) AS INTEGER) <19
                     GROUP BY source_location 
                     ORDER BY count(source_location) DESC
-                    LIMIT 3)
-    UNION
-    SELECT * FROM(SELECT DISTINCT source_location AS morning_destination
+                    LIMIT 3;
+                    ''')
+    morning_destination = db.query('''
+    SELECT DISTINCT source_location AS morning_destination
                     FROM rides 
-                    WHERE time(end_ride_time) BETWEEN 7 AND 10
+                    WHERE CAST(strftime('%H', end_ride_time) AS INTEGER)>= 7 
+                    AND CAST(strftime('%H', end_ride_time) AS INTEGER) <10
                     GROUP BY destination
                     ORDER BY count(destination) DESC
-                    LIMIT 3)
-    UNION
-    SELECT * FROM(SELECT DISTINCT source_location AS afternoon_destination
+                    LIMIT 3;
+                    ''')
+    afternoon_destination = db.query('''
+    SELECT DISTINCT source_location AS afternoon_destination
                     FROM rides 
-                    WHERE time(end_ride_time) BETWEEN 12 AND 14
+                    WHERE CAST(strftime('%H', end_ride_time) AS INTEGER)>= 12 
+                    AND CAST(strftime('%H', end_ride_time) AS INTEGER) <14
                     GROUP BY destination
                     ORDER BY count(destination) DESC
-                    LIMIT 3)
-    UNION
-    SELECT * FROM(SELECT DISTINCT source_location AS evening_destination
+                    LIMIT 3;
+                    ''')
+    evening_destination = db.query('''
+    SELECT DISTINCT source_location AS evening_destination
                     FROM rides 
-                    WHERE time(end_ride_time) BETWEEN 17 AND 19
+                    WHERE CAST(strftime('%H', end_ride_time) AS INTEGER)>= 17 
+                    AND CAST(strftime('%H', end_ride_time) AS INTEGER) <19
                     GROUP BY destination
                     ORDER BY count(destination) DESC
-                    LIMIT 3))
-      ;''')
-    return places
+                    LIMIT 3;
+                    ''')
+    return morning_pick_up, afternoon_pick_up, evening_pick_up, morning_destination, afternoon_destination, evening_destination
 
 
 @intro
@@ -231,7 +243,7 @@ def select_3_7():
     FROM cars_stats AS cs)
     SELECT cs.carid, cs.times_used
     FROM numbered_cars AS cs
-    WHERE (cs.row_num / cs.total_cars) * 100 <= 10;
+    limit (select count() from cars)/10;
 ''')
 
     return cars_ten
@@ -376,12 +388,12 @@ FROM
     for i in a:
         out+=str(i[0]) + ', ' + str(i[1]) + '\n'
 
-    return(out)
+    return out
 
 if __name__ == '__main__':
     select_3_1()
     select_3_2(2018, 11, 16)
-    select_3_3()
+    select_3_3(2018, 11, 16)
     select_3_4(1)
     select_3_5()
     select_3_6()
